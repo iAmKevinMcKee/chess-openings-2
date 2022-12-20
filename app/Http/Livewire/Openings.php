@@ -22,6 +22,25 @@ class Openings extends Component
     public function mount()
     {
         $this->opening = Opening::first() ?? new Opening();
+
+        if($this->playAsWhite) {
+            $correctMove = CorrectMove::query()->where('from_fen', 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1')
+                ->where('is_white', $this->playAsWhite)->where('user_id', auth()->id())->get()->first();
+
+            if($correctMove) {
+                $this->correctMove = $correctMove;
+            } else {
+                $this->correctMove = null;
+            }
+        }
+
+    }
+
+    public function updateProbability($id, $probability)
+    {
+        $possibleMove = PossibleMove::find($id);
+        $possibleMove->probability = $probability;
+        $possibleMove->save();
     }
 
     public function createAndSetOpening()
@@ -71,6 +90,7 @@ class Openings extends Component
                     'fen' => $fromFen,
                     'move_from' => $moveFrom,
                     'move_to' => $moveTo,
+                    'notation' => $notation,
                     'user_id' => auth()->id(),
                 ]);
 

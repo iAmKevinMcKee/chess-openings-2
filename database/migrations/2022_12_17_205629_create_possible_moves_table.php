@@ -19,6 +19,7 @@ return new class extends Migration
             $table->boolean('is_white')->default(1);
             $table->string('move_from');
             $table->string('move_to');
+            $table->string('notation');
             $table->integer('probability')->default(100);
             $table->foreignIdFor(\App\Models\User::class);
             $table->timestamps();

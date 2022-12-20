@@ -1,6 +1,6 @@
 <div
     x-data="{
-        playAsWhite: @entangle('playingAsWhite'),
+        playAsWhite: @entangle('playAsWhite'),
             chessjs: null,
             selectedSquare: null,
             previouslySelectedSquare: null,
@@ -74,6 +74,20 @@
              x-on:next.window="loadFen($event.detail.fen)"
              x-on:click="
         selectedSquare = $event.target.getAttribute('x-ref')
+
+        if(possibleMoves.length && Object.values(possibleMoves).includes('OO') >= 0) {
+            console.log('maybe castling');
+            if(chessjs.get(previouslySelectedSquare).type === 'k'
+                && chessjs.get(previouslySelectedSquare).color === 'w'
+                && selectedSquare === 'g1') {
+                let previousFen = chessjs.fen();
+                let color = chessjs.turn() === 'w' ? 'white' : 'black';
+                chessjs.move('O-O');
+                $wire.call('move', previousFen, chessjs.fen(), previouslySelectedSquare, selectedSquare, color, chessjs.history().slice(-1)[0] );
+                console.log(chessjs.fen());
+            }
+        }
+
         if(possibleMoves.length && possibleMoves.includes(selectedSquare)) {
             let previousFen = chessjs.fen();
             let color = chessjs.turn() === 'w' ? 'white' : 'black';
@@ -91,7 +105,6 @@
         console.log(chessjs.ascii());
         previouslySelectedSquare = selectedSquare;
         console.log(possibleMoves);
-        console.log(chessjs.history());
         updateBoard();
     "
              x-ref="board" id="chess-board" class="w-[640px] h-[640px]">
@@ -177,13 +190,21 @@
             </div>
         </div>
         <div class="justify-center flex-1">
-            <div class="text-center w-full">Possible Moves</div>
-            <button x-on:click="chessjs.undo(); updateBoard()">Go Back</button>
-            @if($possibleMoves)
-                @foreach($possibleMoves as $mv)
-                    <div class="text-center w-full">{{ $mv->move_from }} to {{ $mv->move_to }}</div>
-                @endforeach
-            @endif
+            <button x-on:click="chessjs.undo(); updateBoard();">Go Back</button>
+            <div>
+                <div class="text-center w-full">Possible Moves</div>
+                <div class="flex">
+                    @if($possibleMoves)
+                        @foreach($possibleMoves as $mv)
+                            <div x-data="{ probability: {{ $mv['probability'] }} }" class="flex-1">
+                                <div class="w-full text-center">{{ $mv->notation }}</div>
+                                <input type="text" class="w-[100px]" x-bind:value="probability" />
+                                <button x-on:click="$wire.call('updateProbability', [{{$mv->id}}, probability])">Update</button>
+                            </div>
+                        @endforeach
+                    @endif
+                </div>
+            </div>
             <div class="text-center w-full">Correct Move</div>
             @if($correctMove)
                 <div class="text-center w-full">{{ $correctMove->notation }}</div>
