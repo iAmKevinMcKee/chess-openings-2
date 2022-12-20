@@ -18,7 +18,9 @@ return new class extends Migration
             $table->boolean('is_white')->default(1);
             $table->string('from_fen')->nullable();
             $table->string('to_fen');
-            $table->json('move');
+            $table->text('move_from');
+            $table->text('move_to');
+            $table->text('notation');
             $table->text('message')->nullable();
             $table->foreignIdFor(\App\Models\Opening::class)->nullable();
             $table->foreignIdFor(\App\Models\User::class);

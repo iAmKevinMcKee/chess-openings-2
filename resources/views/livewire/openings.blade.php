@@ -1,5 +1,6 @@
 <div
     x-data="{
+        playAsWhite: @entangle('playingAsWhite'),
             chessjs: null,
             selectedSquare: null,
             previouslySelectedSquare: null,
@@ -77,7 +78,7 @@
             let previousFen = chessjs.fen();
             let color = chessjs.turn() === 'w' ? 'white' : 'black';
             chessjs.move({from: previouslySelectedSquare, to: selectedSquare});
-            $wire.call('move', previousFen, chessjs.fen(), previouslySelectedSquare, selectedSquare, color);
+            $wire.call('move', previousFen, chessjs.fen(), previouslySelectedSquare, selectedSquare, color, chessjs.history().slice(-1)[0] );
             console.log(chessjs.fen());
         } else {
             possibleMoves = chessjs.moves({square: selectedSquare});
@@ -90,6 +91,7 @@
         console.log(chessjs.ascii());
         previouslySelectedSquare = selectedSquare;
         console.log(possibleMoves);
+        console.log(chessjs.history());
         updateBoard();
     "
              x-ref="board" id="chess-board" class="w-[640px] h-[640px]">
@@ -180,9 +182,13 @@
             @if($possibleMoves)
                 @foreach($possibleMoves as $mv)
                     <div class="text-center w-full">{{ $mv->move_from }} to {{ $mv->move_to }}</div>
-
                 @endforeach
-
+            @endif
+            <div class="text-center w-full">Correct Move</div>
+            @if($correctMove)
+                <div class="text-center w-full">{{ $correctMove->notation }}</div>
+            @else
+                <div class="text-center w-full text-red-700">None Recorded</div>
             @endif
         </div>
     </div>

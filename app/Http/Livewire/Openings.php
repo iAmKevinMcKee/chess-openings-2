@@ -17,6 +17,8 @@ class Openings extends Component
 
     public $newOpeningName = '';
 
+    public $correctMove;
+
     public function mount()
     {
         $this->opening = Opening::first() ?? new Opening();
@@ -37,7 +39,7 @@ class Openings extends Component
         $this->opening = $opening;
     }
 
-    public function move($fromFen, $toFen, $moveFrom, $moveTo, $color)
+    public function move($fromFen, $toFen, $moveFrom, $moveTo, $color, $notation)
     {
         if($this->recording) {
             // if playing as white and this is a white move, save as correct move
@@ -49,7 +51,9 @@ class Openings extends Component
                     'user_id' => auth()->id(),
                     ], [
                     'to_fen' => $toFen,
-                    'move' => json_encode([$moveFrom, $moveTo]),
+                    'move_from' => $moveFrom,
+                    'move_to' => $moveTo,
+                    'notation' => $notation,
                 ]);
 
                 $this->possibleMoves = PossibleMove::where('is_white', 1)
@@ -88,8 +92,14 @@ class Openings extends Component
 
             $this->dispatchBrowserEvent('next', ['fen' => 'rnbqkbnr/pppp1ppp/8/4p3/4P3/8/PPPP1PPP/RNBQKBNR w KQkq e6 0 2']);
         }
+        $correctMove = CorrectMove::query()->where('from_fen', $toFen)
+            ->where('is_white', $this->playAsWhite)->where('user_id', auth()->id())->get()->first();
 
-//        ray($fen);
+        if($correctMove) {
+            $this->correctMove = $correctMove;
+        } else {
+            $this->correctMove = null;
+        }
     }
     public function render()
     {
