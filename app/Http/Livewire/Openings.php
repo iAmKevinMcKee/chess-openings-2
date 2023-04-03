@@ -18,6 +18,9 @@ class Openings extends Component
     public $newOpeningName = '';
 
     public $correctMove;
+    public $wrongMove = false;
+
+    public $lichessPossibleMoves;
 
     public function mount()
     {
@@ -77,6 +80,7 @@ class Openings extends Component
 
                 $this->possibleMoves = PossibleMove::where('is_white', 1)
                     ->where('fen', $toFen)
+                    ->where('opening_id', $this->opening->id)
                     ->where('user_id', auth()->id())
                     ->get();
 
@@ -91,11 +95,13 @@ class Openings extends Component
                     'move_from' => $moveFrom,
                     'move_to' => $moveTo,
                     'notation' => $notation,
+                    'opening_id' => $this->opening->id,
                     'user_id' => auth()->id(),
                 ]);
 
                 $this->possibleMoves = PossibleMove::where('is_white', 1)
                     ->where('fen', $fromFen)
+                    ->where('opening_id', $this->opening->id)
                     ->where('user_id', auth()->id())
                     ->get();
             }
@@ -108,9 +114,43 @@ class Openings extends Component
 //            ]);
         } else {
             // check if this move was correct (or maybe that's already done on the front end)
-            // if it was correct, make the next move or show a success message
+            // if it was correct, make the next move or show a success message if this is the end
+            $correctMove = CorrectMove::where('from_fen', $fromFen)
+                ->where('is_white', $this->playAsWhite)
+                ->where('user_id', auth()->id())
+                ->get()->first();
 
-            $this->dispatchBrowserEvent('next', ['fen' => 'rnbqkbnr/pppp1ppp/8/4p3/4P3/8/PPPP1PPP/RNBQKBNR w KQkq e6 0 2']);
+            if($correctMove) {
+                $this->correctMove = $correctMove;
+                if($correctMove->to_fen === $toFen) {
+                    $this->wrongMove = false;
+                    $this->possibleMoves = PossibleMove::where('is_white', $this->playAsWhite)
+                        ->where('fen', $toFen)
+                        ->where('user_id', auth()->id())
+                        ->orderBy('probability', 'desc')
+                        ->get();
+                    // randomly pick a possible move based on probability
+                    $totalProbability = $this->possibleMoves->sum('probability');
+                    $randomNumber = rand(0, $totalProbability);
+                    foreach($this->possibleMoves as $move) {
+                        $randomNumber -= $move->probability;
+                        if($randomNumber <= 0) {
+                            $this->dispatchBrowserEvent('next', ['notation' => $move->notation]);
+//                            $this->dispatchBrowserEvent('next', ['fen' => $move->fen]);
+//            $this->dispatchBrowserEvent('next', ['fen' => 'rnbqkbnr/pppp1ppp/8/4p3/4P3/8/PPPP1PPP/RNBQKBNR w KQkq e6 0 2']);
+
+                            break;
+                        }
+                    }
+
+                } else {
+                    $this->wrongMove = true;
+                }
+            } else {
+                $this->correctMove = null;
+            }
+
+//            $this->dispatchBrowserEvent('next', ['fen' => 'rnbqkbnr/pppp1ppp/8/4p3/4P3/8/PPPP1PPP/RNBQKBNR w KQkq e6 0 2']);
         }
         $correctMove = CorrectMove::query()->where('from_fen', $toFen)
             ->where('is_white', $this->playAsWhite)->where('user_id', auth()->id())->get()->first();

@@ -13,16 +13,13 @@ return new class extends Migration
      */
     public function up()
     {
-        Schema::create('possible_moves', function (Blueprint $table) {
+        Schema::create('attempt_moves', function (Blueprint $table) {
             $table->id();
-            $table->string('fen');
-            $table->boolean('is_white')->default(1);
-            $table->string('move_from');
-            $table->string('move_to');
+            $table->foreignIdFor(\App\Models\Attempt::class);
+            $table->integer('move_number');
             $table->string('notation');
-            $table->integer('probability')->default(100);
-            $table->foreignIdFor(\App\Models\Opening::class);
-            $table->foreignIdFor(\App\Models\User::class);
+            $table->boolean('correct');
+            $table->string('correct_move')->nullable();
             $table->timestamps();
         });
     }
@@ -34,6 +31,6 @@ return new class extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('possible_moves');
+        Schema::dropIfExists('attempt_moves');
     }
 };

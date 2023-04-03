@@ -22,6 +22,7 @@ return new class extends Migration
             $table->text('move_to');
             $table->text('notation');
             $table->text('message')->nullable();
+            $table->boolean('final_move')->default(0);
             $table->foreignIdFor(\App\Models\Opening::class)->nullable();
             $table->foreignIdFor(\App\Models\User::class);
             $table->timestamps();

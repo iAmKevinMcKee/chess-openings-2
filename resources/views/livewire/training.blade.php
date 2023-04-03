@@ -10,7 +10,12 @@
                 this.chessjs.load(fen);
                 this.updateBoard();
             },
+            resetBoard() {
+                chessjs.load('rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1');
+                updateBoard();
+            },
             updateBoard() {
+                this.selectedSquare = null;
                 let squares = document.querySelectorAll('#chess-board > div > div');
                 squares.forEach((square) => {
                     square.classList.remove('possible');
@@ -55,24 +60,26 @@
             updateBoard();
         })"
     class="mt-8 text-2xl">
-    <div>
-        @if(! $recording)
-            <button wire:click="$set('recording', true)">Start Recording</button>
-        @else
-            <button wire:click="$set('recording', false)">Stop Recording</button>
-            <div>Opening: {{$opening->name}}</div>
-            <div>
-                <input type="text" wire:model.defer="newOpeningName"/>
-                <button wire:click="createAndSetOpening">Create and Set</button>
-            </div>
-        @endif
-
-    </div>
     <div class="flex">
         <div wire:ignore
+             x-on:reset.window="
+             chessjs = new Chess();
+             selectedSquare = null;
+            previouslySelectedSquare = null;
+            possibleMoves = [];
+             chessjs.load('rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1');
+             updateBoard();
+            "
              x-on:next.window="chessjs.move($event.detail.notation); updateBoard();"
              x-on:click="
         selectedSquare = $event.target.getAttribute('x-ref')
+        console.log('selectedSquare: ' + selectedSquare);
+        console.log('previouslySelectedSquare: ' + previouslySelectedSquare);
+        if(selectedSquare === previouslySelectedSquare) {
+            previouslySelectedSquare = selectedSquare;
+            possibleMoves = chessjs.moves({square: selectedSquare});
+            return;
+        }
 
         console.log(possibleMoves);
 
@@ -116,9 +123,7 @@
                 });
             }
         }
-        console.log(chessjs.ascii());
         previouslySelectedSquare = selectedSquare;
-        console.log(possibleMoves);
         updateBoard();
     "
              x-ref="board" id="chess-board" class="w-[640px] h-[640px]">
@@ -204,36 +209,34 @@
             </div>
         </div>
         <div class="justify-center flex-1">
-            <button x-on:click="chessjs.undo(); updateBoard();">Go Back</button>
-            <div>
-                <div>
-                    @if($wrongMove)
-                        <div class="text-red-500">Wrong!</div>
-                    @endif
-                </div>
-                <div class="text-center w-full">Possible Moves</div>
-                <div class="flex flex-col">
-                    @if($possibleMoves)
-                        <div>
+            <form wire:submit.prevent="setOpenings">
+                {{ $this->form }}
 
-                        @foreach($possibleMoves->sortByDesc('probability') as $mv)
-                            <div id="possible-move-{{$loop->index}}" x-data="{ probability: {{ $mv['probability'] }} }" class="flex flex-row flex-1">
-                                <div x-init="console.log(probability)" class="w-full text-center">{{ $mv->notation }}</div>
-                                <input type="text" class="w-[100px]" x-model="probability" />
-                                <button x-on:click="$wire.call('updateProbability', {{$mv->id}}, probability)">Update</button>
-                            </div>
-                        @endforeach
+                <x-filament::button type="submit">
+                    Set Openings
+                </x-filament::button>
+            </form>
 
-                    @endif
-                </div>
-            </div>
-            <div class="text-center w-full">Correct Move</div>
-            @if($correctMove)
-                <div class="text-center w-full">{{ $correctMove->notation }}</div>
-            @else
-                <div class="text-center w-full text-red-700">None Recorded</div>
+            @if($this->openings)
+                <x-filament::button wire:click="startAttempt">Start Attempt!!!</x-filament::button>
             @endif
+
+            <div class="text-center w-full">Your Move</div>
+            <button x-on:click="chessjs.undo(); updateBoard();">Go Back</button>
+            <div x-text="JSON.stringify(selectedSquare)"></div>
+            <div>
+                @if($wrongMove)
+                    <div>
+                        <div class="text-red-500">Wrong!</div>
+                    </div>
+                    <div class="text-center w-full">Correct Move</div>
+                    @if($correctMoveNotation)
+                        <div class="text-center w-full">{{ $correctMoveNotation }}</div>
+                    @endif
+                @endif
+            </div>
         </div>
     </div>
-</div>
+    <x-filament-actions::modals/>
+
 </div>
