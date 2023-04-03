@@ -208,22 +208,21 @@
                 <div x-ref="h1" class="bg-gray-300 even:bg-white border border-gray-800"></div>
             </div>
         </div>
-        <div class="justify-center flex-1">
-            <form wire:submit.prevent="setOpenings">
+        <div class="flex justify-center items-center flex-1">
+            @if(count($this->openings) == 0)
+            <form wire:submit.prevent="setOpenings"
+                  class="w-full px-3" >
                 {{ $this->form }}
 
                 <x-filament::button type="submit">
                     Set Openings
                 </x-filament::button>
             </form>
-
-            @if($this->openings)
-                <x-filament::button wire:click="startAttempt">Start Attempt!!!</x-filament::button>
             @endif
 
-            <div class="text-center w-full">Your Move</div>
-            <button x-on:click="chessjs.undo(); updateBoard();">Go Back</button>
-            <div x-text="JSON.stringify(selectedSquare)"></div>
+            @if($this->openings)
+                <x-filament::button wire:click="startAttempt">Start Training</x-filament::button>
+            @endif
             <div>
                 @if($wrongMove)
                     <div>

@@ -6,6 +6,7 @@ use App\Models\Attempt;
 use App\Models\CorrectMove;
 use App\Models\Opening;
 use App\Models\PossibleMove;
+use App\Models\TrainingSession;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Concerns\InteractsWithForms;
 use Filament\Forms\Contracts\HasForms;
@@ -19,6 +20,7 @@ class Training extends Component implements HasForms
 
     public $formData;
     public $attempt = null;
+    public $trainingSession;
     public $correctMoveNotation;
     public $playAsWhite = true;
     public $wrongMove = null;
@@ -26,6 +28,10 @@ class Training extends Component implements HasForms
 
     public function mount(): void
     {
+        $this->trainingSession = TrainingSession::create([
+            'user_id' => auth()->user()->id,
+        ]);
+
         $this->openings = session()->get('openings') ?? [];
         $this->form->fill([
             'openings' => $this->openings,
@@ -62,6 +68,7 @@ class Training extends Component implements HasForms
         $this->attempt = Attempt::create([
             'user_id' => auth()->user()->id,
             'opening_id' => (int) $openingId,
+            'training_session_id' => $this->trainingSession->id,
         ]);
     }
 
@@ -92,6 +99,9 @@ class Training extends Component implements HasForms
                 $this->attempt->update([
                     'correct' => 1,
                 ]);
+                $this->trainingSession->update([
+                    'correct' => $this->trainingSession->correct + 1,
+                ]);
                 Notification::make()->success()->title('You Won!')->send();
             } else {
                 Notification::make()->success()->title('Correct!')->send();
@@ -112,6 +122,9 @@ class Training extends Component implements HasForms
 
             $this->attempt->update([
                 'correct' => 0,
+            ]);
+            $this->trainingSession->update([
+                'incorrect' => $this->trainingSession->incorrect + 1,
             ]);
         }
     }
