@@ -29,10 +29,10 @@ Route::middleware([
     config('jetstream.auth_session'),
     'verified'
 ])->group(function () {
-    Route::get('/dashboard', function () {
-        return view('dashboard');
-    })->name('dashboard');
-    Route::get('/training', function () {
-        return view('training');
-    })->name('training');
+    Route::get('/train', function () {
+        return view('train');
+    })->name('train');
+    Route::get('/practice', function () {
+        return view('practice');
+    })->name('practice');
 });

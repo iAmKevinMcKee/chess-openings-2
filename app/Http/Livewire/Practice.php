@@ -14,7 +14,7 @@ use Filament\Forms\Form;
 use Filament\Notifications\Notification;
 use Livewire\Component;
 
-class Training extends Component implements HasForms
+class Practice extends Component implements HasForms
 {
     use InteractsWithForms;
 
@@ -22,7 +22,7 @@ class Training extends Component implements HasForms
     public $attempt = null;
     public $trainingSession;
     public $correctMoveNotation;
-    public $playAsWhite = true;
+    public $playAsWhite = false;
     public $wrongMove = null;
     public $openings = [];
 
@@ -131,7 +131,7 @@ class Training extends Component implements HasForms
 
     public function render()
     {
-        return view('livewire.training');
+        return view('livewire.practice');
     }
 
     private function randomlyPickAPossibleMoveBasedOnProbability(): PossibleMove|null
