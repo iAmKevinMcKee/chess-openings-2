@@ -62,7 +62,7 @@
     class="mt-8 text-2xl">
     <div class="flex">
         <div id="chess-board"
-            wire:ignore
+             wire:ignore
              x-on:reset.window="
              chessjs = new Chess();
              selectedSquare = null;
@@ -71,7 +71,10 @@
              chessjs.load('rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1');
              updateBoard();
             "
-             x-on:next.window="chessjs.move($event.detail.notation); updateBoard();"
+             x-on:next.window="
+                chessjs.move($event.detail.notation);
+                updateBoard();
+                "
              x-on:click="
         selectedSquare = $event.target.getAttribute('x-ref')
         console.log('selectedSquare: ' + selectedSquare);
@@ -128,112 +131,219 @@
         updateBoard();
     "
              x-ref="board" id="chess-board"
-             class="w-[640px] h-[640px]" :class="{'rotate-180': !playAsWhite}">
+             class="w-[640px] h-[640px]" :class="{ 'rotate-180' : ! playAsWhite}">
             <div class="grid grid-cols-8 h-[80px] w-full">
-                <div x-ref="a8" class="bg-gray-300 odd:bg-white border border-gray-800 {{$playAsWhite ? '' : 'rotate-180'}}"></div>
-                <div x-ref="b8" class="bg-gray-300 odd:bg-white border border-gray-800 {{$playAsWhite ? '' : 'rotate-180'}}"></div>
-                <div x-ref="c8" class="bg-gray-300 odd:bg-white border border-gray-800 {{$playAsWhite ? '' : 'rotate-180'}}"></div>
-                <div x-ref="d8" class="bg-gray-300 odd:bg-white border border-gray-800 {{$playAsWhite ? '' : 'rotate-180'}}"></div>
-                <div x-ref="e8" class="bg-gray-300 odd:bg-white border border-gray-800 {{$playAsWhite ? '' : 'rotate-180'}}"></div>
-                <div x-ref="f8" class="bg-gray-300 odd:bg-white border border-gray-800 {{$playAsWhite ? '' : 'rotate-180'}}"></div>
-                <div x-ref="g8" class="bg-gray-300 odd:bg-white border border-gray-800 {{$playAsWhite ? '' : 'rotate-180'}}"></div>
-                <div x-ref="h8" class="bg-gray-300 odd:bg-white border border-gray-800 {{$playAsWhite ? '' : 'rotate-180'}}"></div>
+                <div x-ref="a8" class="bg-gray-300 odd:bg-white border border-gray-800"
+                     :class="{'rotate-180' : ! playAsWhite}"></div>
+                <div x-ref="b8" class="bg-gray-300 odd:bg-white border border-gray-800"
+                     :class="{'rotate-180' : ! playAsWhite}"></div>
+                <div x-ref="c8" class="bg-gray-300 odd:bg-white border border-gray-800"
+                     :class="{'rotate-180' : ! playAsWhite}"></div>
+                <div x-ref="d8" class="bg-gray-300 odd:bg-white border border-gray-800"
+                     :class="{'rotate-180' : ! playAsWhite}"></div>
+                <div x-ref="e8" class="bg-gray-300 odd:bg-white border border-gray-800"
+                     :class="{'rotate-180' : ! playAsWhite}"></div>
+                <div x-ref="f8" class="bg-gray-300 odd:bg-white border border-gray-800"
+                     :class="{'rotate-180' : ! playAsWhite}"></div>
+                <div x-ref="g8" class="bg-gray-300 odd:bg-white border border-gray-800"
+                     :class="{'rotate-180' : ! playAsWhite}"></div>
+                <div x-ref="h8" class="bg-gray-300 odd:bg-white border border-gray-800"
+                     :class="{'rotate-180' : ! playAsWhite}"></div>
             </div>
             <div class="grid grid-cols-8 h-[80px] w-full">
-                <div x-ref="a7" class="bg-gray-300 even:bg-white border border-gray-800 {{$playAsWhite ? '' : 'rotate-180'}}"></div>
-                <div x-ref="b7" class="bg-gray-300 even:bg-white border border-gray-800 {{$playAsWhite ? '' : 'rotate-180'}}"></div>
-                <div x-ref="c7" class="bg-gray-300 even:bg-white border border-gray-800 {{$playAsWhite ? '' : 'rotate-180'}}"></div>
-                <div x-ref="d7" class="bg-gray-300 even:bg-white border border-gray-800 {{$playAsWhite ? '' : 'rotate-180'}}"></div>
-                <div x-ref="e7" class="bg-gray-300 even:bg-white border border-gray-800 {{$playAsWhite ? '' : 'rotate-180'}}"></div>
-                <div x-ref="f7" class="bg-gray-300 even:bg-white border border-gray-800 {{$playAsWhite ? '' : 'rotate-180'}}"></div>
-                <div x-ref="g7" class="bg-gray-300 even:bg-white border border-gray-800 {{$playAsWhite ? '' : 'rotate-180'}}"></div>
-                <div x-ref="h7" class="bg-gray-300 even:bg-white border border-gray-800 {{$playAsWhite ? '' : 'rotate-180'}}"></div>
+                <div x-ref="a7" class="bg-gray-300 even:bg-white border border-gray-800"
+                     :class="{'rotate-180' : ! playAsWhite}"></div>
+                <div x-ref="b7" class="bg-gray-300 even:bg-white border border-gray-800"
+                     :class="{'rotate-180' : ! playAsWhite}"></div>
+                <div x-ref="c7" class="bg-gray-300 even:bg-white border border-gray-800"
+                     :class="{'rotate-180' : ! playAsWhite}"></div>
+                <div x-ref="d7" class="bg-gray-300 even:bg-white border border-gray-800"
+                     :class="{'rotate-180' : ! playAsWhite}"></div>
+                <div x-ref="e7" class="bg-gray-300 even:bg-white border border-gray-800"
+                     :class="{'rotate-180' : ! playAsWhite}"></div>
+                <div x-ref="f7" class="bg-gray-300 even:bg-white border border-gray-800"
+                     :class="{'rotate-180' : ! playAsWhite}"></div>
+                <div x-ref="g7" class="bg-gray-300 even:bg-white border border-gray-800"
+                     :class="{'rotate-180' : ! playAsWhite}"></div>
+                <div x-ref="h7" class="bg-gray-300 even:bg-white border border-gray-800"
+                     :class="{'rotate-180' : ! playAsWhite}"></div>
             </div>
             <div class="grid grid-cols-8 h-[80px] w-full">
-                <div x-ref="a6" class="bg-gray-300 odd:bg-white border border-gray-800 {{$playAsWhite ? '' : 'rotate-180'}}"></div>
-                <div x-ref="b6" class="bg-gray-300 odd:bg-white border border-gray-800 {{$playAsWhite ? '' : 'rotate-180'}}"></div>
-                <div x-ref="c6" class="bg-gray-300 odd:bg-white border border-gray-800 {{$playAsWhite ? '' : 'rotate-180'}}"></div>
-                <div x-ref="d6" class="bg-gray-300 odd:bg-white border border-gray-800 {{$playAsWhite ? '' : 'rotate-180'}}"></div>
-                <div x-ref="e6" class="bg-gray-300 odd:bg-white border border-gray-800 {{$playAsWhite ? '' : 'rotate-180'}}"></div>
-                <div x-ref="f6" class="bg-gray-300 odd:bg-white border border-gray-800 {{$playAsWhite ? '' : 'rotate-180'}}"></div>
-                <div x-ref="g6" class="bg-gray-300 odd:bg-white border border-gray-800 {{$playAsWhite ? '' : 'rotate-180'}}"></div>
-                <div x-ref="h6" class="bg-gray-300 odd:bg-white border border-gray-800 {{$playAsWhite ? '' : 'rotate-180'}}"></div>
+                <div x-ref="a6" class="bg-gray-300 odd:bg-white border border-gray-800"
+                     :class="{'rotate-180' : ! playAsWhite}"></div>
+                <div x-ref="b6" class="bg-gray-300 odd:bg-white border border-gray-800"
+                     :class="{'rotate-180' : ! playAsWhite}"></div>
+                <div x-ref="c6" class="bg-gray-300 odd:bg-white border border-gray-800"
+                     :class="{'rotate-180' : ! playAsWhite}"></div>
+                <div x-ref="d6" class="bg-gray-300 odd:bg-white border border-gray-800"
+                     :class="{'rotate-180' : ! playAsWhite}"></div>
+                <div x-ref="e6" class="bg-gray-300 odd:bg-white border border-gray-800"
+                     :class="{'rotate-180' : ! playAsWhite}"></div>
+                <div x-ref="f6" class="bg-gray-300 odd:bg-white border border-gray-800"
+                     :class="{'rotate-180' : ! playAsWhite}"></div>
+                <div x-ref="g6" class="bg-gray-300 odd:bg-white border border-gray-800"
+                     :class="{'rotate-180' : ! playAsWhite}"></div>
+                <div x-ref="h6" class="bg-gray-300 odd:bg-white border border-gray-800"
+                     :class="{'rotate-180' : ! playAsWhite}"></div>
             </div>
             <div class="grid grid-cols-8 h-[80px] w-full">
-                <div x-ref="a5" class="bg-gray-300 even:bg-white border border-gray-800 {{$playAsWhite ? '' : 'rotate-180'}}"></div>
-                <div x-ref="b5" class="bg-gray-300 even:bg-white border border-gray-800 {{$playAsWhite ? '' : 'rotate-180'}}"></div>
-                <div x-ref="c5" class="bg-gray-300 even:bg-white border border-gray-800 {{$playAsWhite ? '' : 'rotate-180'}}"></div>
-                <div x-ref="d5" class="bg-gray-300 even:bg-white border border-gray-800 {{$playAsWhite ? '' : 'rotate-180'}}"></div>
-                <div x-ref="e5" class="bg-gray-300 even:bg-white border border-gray-800 {{$playAsWhite ? '' : 'rotate-180'}}"></div>
-                <div x-ref="f5" class="bg-gray-300 even:bg-white border border-gray-800 {{$playAsWhite ? '' : 'rotate-180'}}"></div>
-                <div x-ref="g5" class="bg-gray-300 even:bg-white border border-gray-800 {{$playAsWhite ? '' : 'rotate-180'}}"></div>
-                <div x-ref="h5" class="bg-gray-300 even:bg-white border border-gray-800 {{$playAsWhite ? '' : 'rotate-180'}}"></div>
+                <div x-ref="a5" class="bg-gray-300 even:bg-white border border-gray-800"
+                     :class="{'rotate-180' : ! playAsWhite}"></div>
+                <div x-ref="b5" class="bg-gray-300 even:bg-white border border-gray-800"
+                     :class="{'rotate-180' : ! playAsWhite}"></div>
+                <div x-ref="c5" class="bg-gray-300 even:bg-white border border-gray-800"
+                     :class="{'rotate-180' : ! playAsWhite}"></div>
+                <div x-ref="d5" class="bg-gray-300 even:bg-white border border-gray-800"
+                     :class="{'rotate-180' : ! playAsWhite}"></div>
+                <div x-ref="e5" class="bg-gray-300 even:bg-white border border-gray-800"
+                     :class="{'rotate-180' : ! playAsWhite}"></div>
+                <div x-ref="f5" class="bg-gray-300 even:bg-white border border-gray-800"
+                     :class="{'rotate-180' : ! playAsWhite}"></div>
+                <div x-ref="g5" class="bg-gray-300 even:bg-white border border-gray-800"
+                     :class="{'rotate-180' : ! playAsWhite}"></div>
+                <div x-ref="h5" class="bg-gray-300 even:bg-white border border-gray-800"
+                     :class="{'rotate-180' : ! playAsWhite}"></div>
             </div>
             <div class="grid grid-cols-8 h-[80px] w-full">
-                <div x-ref="a4" class="bg-gray-300 odd:bg-white border border-gray-800 {{$playAsWhite ? '' : 'rotate-180'}}"></div>
-                <div x-ref="b4" class="bg-gray-300 odd:bg-white border border-gray-800 {{$playAsWhite ? '' : 'rotate-180'}}"></div>
-                <div x-ref="c4" class="bg-gray-300 odd:bg-white border border-gray-800 {{$playAsWhite ? '' : 'rotate-180'}}"></div>
-                <div x-ref="d4" class="bg-gray-300 odd:bg-white border border-gray-800 {{$playAsWhite ? '' : 'rotate-180'}}"></div>
-                <div x-ref="e4" class="bg-gray-300 odd:bg-white border border-gray-800 {{$playAsWhite ? '' : 'rotate-180'}}"></div>
-                <div x-ref="f4" class="bg-gray-300 odd:bg-white border border-gray-800 {{$playAsWhite ? '' : 'rotate-180'}}"></div>
-                <div x-ref="g4" class="bg-gray-300 odd:bg-white border border-gray-800 {{$playAsWhite ? '' : 'rotate-180'}}"></div>
-                <div x-ref="h4" class="bg-gray-300 odd:bg-white border border-gray-800 {{$playAsWhite ? '' : 'rotate-180'}}"></div>
+                <div x-ref="a4" class="bg-gray-300 odd:bg-white border border-gray-800"
+                     :class="{'rotate-180' : ! playAsWhite}"></div>
+                <div x-ref="b4" class="bg-gray-300 odd:bg-white border border-gray-800"
+                     :class="{'rotate-180' : ! playAsWhite}"></div>
+                <div x-ref="c4" class="bg-gray-300 odd:bg-white border border-gray-800"
+                     :class="{'rotate-180' : ! playAsWhite}"></div>
+                <div x-ref="d4" class="bg-gray-300 odd:bg-white border border-gray-800"
+                     :class="{'rotate-180' : ! playAsWhite}"></div>
+                <div x-ref="e4" class="bg-gray-300 odd:bg-white border border-gray-800"
+                     :class="{'rotate-180' : ! playAsWhite}"></div>
+                <div x-ref="f4" class="bg-gray-300 odd:bg-white border border-gray-800"
+                     :class="{'rotate-180' : ! playAsWhite}"></div>
+                <div x-ref="g4" class="bg-gray-300 odd:bg-white border border-gray-800"
+                     :class="{'rotate-180' : ! playAsWhite}"></div>
+                <div x-ref="h4" class="bg-gray-300 odd:bg-white border border-gray-800"
+                     :class="{'rotate-180' : ! playAsWhite}"></div>
             </div>
             <div class="grid grid-cols-8 h-[80px] w-full">
-                <div x-ref="a3" class="bg-gray-300 even:bg-white border border-gray-800 {{$playAsWhite ? '' : 'rotate-180'}}"></div>
-                <div x-ref="b3" class="bg-gray-300 even:bg-white border border-gray-800 {{$playAsWhite ? '' : 'rotate-180'}}"></div>
-                <div x-ref="c3" class="bg-gray-300 even:bg-white border border-gray-800 {{$playAsWhite ? '' : 'rotate-180'}}"></div>
-                <div x-ref="d3" class="bg-gray-300 even:bg-white border border-gray-800 {{$playAsWhite ? '' : 'rotate-180'}}"></div>
-                <div x-ref="e3" class="bg-gray-300 even:bg-white border border-gray-800 {{$playAsWhite ? '' : 'rotate-180'}}"></div>
-                <div x-ref="f3" class="bg-gray-300 even:bg-white border border-gray-800 {{$playAsWhite ? '' : 'rotate-180'}}"></div>
-                <div x-ref="g3" class="bg-gray-300 even:bg-white border border-gray-800 {{$playAsWhite ? '' : 'rotate-180'}}"></div>
-                <div x-ref="h3" class="bg-gray-300 even:bg-white border border-gray-800 {{$playAsWhite ? '' : 'rotate-180'}}"></div>
+                <div x-ref="a3" class="bg-gray-300 even:bg-white border border-gray-800"
+                     :class="{'rotate-180' : ! playAsWhite}"></div>
+                <div x-ref="b3" class="bg-gray-300 even:bg-white border border-gray-800"
+                     :class="{'rotate-180' : ! playAsWhite}"></div>
+                <div x-ref="c3" class="bg-gray-300 even:bg-white border border-gray-800"
+                     :class="{'rotate-180' : ! playAsWhite}"></div>
+                <div x-ref="d3" class="bg-gray-300 even:bg-white border border-gray-800"
+                     :class="{'rotate-180' : ! playAsWhite}"></div>
+                <div x-ref="e3" class="bg-gray-300 even:bg-white border border-gray-800"
+                     :class="{'rotate-180' : ! playAsWhite}"></div>
+                <div x-ref="f3" class="bg-gray-300 even:bg-white border border-gray-800"
+                     :class="{'rotate-180' : ! playAsWhite}"></div>
+                <div x-ref="g3" class="bg-gray-300 even:bg-white border border-gray-800"
+                     :class="{'rotate-180' : ! playAsWhite}"></div>
+                <div x-ref="h3" class="bg-gray-300 even:bg-white border border-gray-800"
+                     :class="{'rotate-180' : ! playAsWhite}"></div>
             </div>
             <div class="grid grid-cols-8 h-[80px] w-full">
-                <div x-ref="a2" class="bg-gray-300 odd:bg-white border border-gray-800 {{$playAsWhite ? '' : 'rotate-180'}}"></div>
-                <div x-ref="b2" class="bg-gray-300 odd:bg-white border border-gray-800 {{$playAsWhite ? '' : 'rotate-180'}}"></div>
-                <div x-ref="c2" class="bg-gray-300 odd:bg-white border border-gray-800 {{$playAsWhite ? '' : 'rotate-180'}}"></div>
-                <div x-ref="d2" class="bg-gray-300 odd:bg-white border border-gray-800 {{$playAsWhite ? '' : 'rotate-180'}}"></div>
-                <div x-ref="e2" class="bg-gray-300 odd:bg-white border border-gray-800 {{$playAsWhite ? '' : 'rotate-180'}}"></div>
-                <div x-ref="f2" class="bg-gray-300 odd:bg-white border border-gray-800 {{$playAsWhite ? '' : 'rotate-180'}}"></div>
-                <div x-ref="g2" class="bg-gray-300 odd:bg-white border border-gray-800 {{$playAsWhite ? '' : 'rotate-180'}}"></div>
-                <div x-ref="h2" class="bg-gray-300 odd:bg-white border border-gray-800 {{$playAsWhite ? '' : 'rotate-180'}}"></div>
+                <div x-ref="a2" class="bg-gray-300 odd:bg-white border border-gray-800"
+                     :class="{'rotate-180' : ! playAsWhite}"></div>
+                <div x-ref="b2" class="bg-gray-300 odd:bg-white border border-gray-800"
+                     :class="{'rotate-180' : ! playAsWhite}"></div>
+                <div x-ref="c2" class="bg-gray-300 odd:bg-white border border-gray-800"
+                     :class="{'rotate-180' : ! playAsWhite}"></div>
+                <div x-ref="d2" class="bg-gray-300 odd:bg-white border border-gray-800"
+                     :class="{'rotate-180' : ! playAsWhite}"></div>
+                <div x-ref="e2" class="bg-gray-300 odd:bg-white border border-gray-800"
+                     :class="{'rotate-180' : ! playAsWhite}"></div>
+                <div x-ref="f2" class="bg-gray-300 odd:bg-white border border-gray-800"
+                     :class="{'rotate-180' : ! playAsWhite}"></div>
+                <div x-ref="g2" class="bg-gray-300 odd:bg-white border border-gray-800"
+                     :class="{'rotate-180' : ! playAsWhite}"></div>
+                <div x-ref="h2" class="bg-gray-300 odd:bg-white border border-gray-800"
+                     :class="{'rotate-180' : ! playAsWhite}"></div>
             </div>
             <div class="grid grid-cols-8 h-[80px] w-full">
-                <div x-ref="a1" class="bg-gray-300 even:bg-white border border-gray-800 {{$playAsWhite ? '' : 'rotate-180'}}"></div>
-                <div x-ref="b1" class="bg-gray-300 even:bg-white border border-gray-800 {{$playAsWhite ? '' : 'rotate-180'}}"></div>
-                <div x-ref="c1" class="bg-gray-300 even:bg-white border border-gray-800 {{$playAsWhite ? '' : 'rotate-180'}}"></div>
-                <div x-ref="d1" class="bg-gray-300 even:bg-white border border-gray-800 {{$playAsWhite ? '' : 'rotate-180'}}"></div>
-                <div x-ref="e1" class="bg-gray-300 even:bg-white border border-gray-800 {{$playAsWhite ? '' : 'rotate-180'}}"></div>
-                <div x-ref="f1" class="bg-gray-300 even:bg-white border border-gray-800 {{$playAsWhite ? '' : 'rotate-180'}}"></div>
-                <div x-ref="g1" class="bg-gray-300 even:bg-white border border-gray-800 {{$playAsWhite ? '' : 'rotate-180'}}"></div>
-                <div x-ref="h1" class="bg-gray-300 even:bg-white border border-gray-800 {{$playAsWhite ? '' : 'rotate-180'}}"></div>
+                <div x-ref="a1" class="bg-gray-300 even:bg-white border border-gray-800"
+                     :class="{'rotate-180' : ! playAsWhite}"></div>
+                <div x-ref="b1" class="bg-gray-300 even:bg-white border border-gray-800"
+                     :class="{'rotate-180' : ! playAsWhite}"></div>
+                <div x-ref="c1" class="bg-gray-300 even:bg-white border border-gray-800"
+                     :class="{'rotate-180' : ! playAsWhite}"></div>
+                <div x-ref="d1" class="bg-gray-300 even:bg-white border border-gray-800"
+                     :class="{'rotate-180' : ! playAsWhite}"></div>
+                <div x-ref="e1" class="bg-gray-300 even:bg-white border border-gray-800"
+                     :class="{'rotate-180' : ! playAsWhite}"></div>
+                <div x-ref="f1" class="bg-gray-300 even:bg-white border border-gray-800"
+                     :class="{'rotate-180' : ! playAsWhite}"></div>
+                <div x-ref="g1" class="bg-gray-300 even:bg-white border border-gray-800"
+                     :class="{'rotate-180' : ! playAsWhite}"></div>
+                <div x-ref="h1" class="bg-gray-300 even:bg-white border border-gray-800"
+                     :class="{'rotate-180' : ! playAsWhite}"></div>
             </div>
         </div>
-        <div class="flex justify-center items-center flex-1">
+        <div class="flex flex-col justify-between items-center flex-1">
+            @if($trainingSession)
+                <div id="training-stats" class="w-full px-4">
+                    <dl class="mt-5 grid grid-cols-1 divide-y divide-gray-200 overflow-hidden rounded-lg bg-white shadow md:grid-cols-3 md:divide-x md:divide-y-0">
+                        <div class="px-4 py-5 sm:p-6">
+                            <dt class="text-base font-normal text-gray-900">Correct</dt>
+                            <dd class="mt-1 flex items-baseline justify-between md:block lg:flex">
+                                <div class="flex items-baseline text-2xl font-semibold text-indigo-600">
+                                    {{ $trainingSession->correct ?? 0 }}
+                                </div>
+                            </dd>
+                        </div>
+
+                        <div class="px-4 py-5 sm:p-6">
+                            <dt class="text-base font-normal text-gray-900">Incorrect</dt>
+                            <dd class="mt-1 flex items-baseline justify-between md:block lg:flex">
+                                <div class="flex items-baseline text-2xl font-semibold text-indigo-600">
+                                    {{ $trainingSession->incorrect ?? 0 }}
+                                </div>
+                            </dd>
+                        </div>
+
+                        <div class="px-4 py-5 sm:p-6">
+                            <dt class="text-base font-normal text-gray-900">Percent</dt>
+                            <dd class="mt-1 flex items-baseline justify-between md:block lg:flex">
+                                <div class="flex items-baseline text-2xl font-semibold text-indigo-600">
+                                    {{ number_format($trainingSession->percentCorrect(), 2) }}%
+                                </div>
+                            </dd>
+                        </div>
+                    </dl>
+                    @if($attempt)
+                        <h3 class="text-2xl text-center mt-2 font-semibold leading-6 text-gray-900">{{$attempt->opening->name}}</h3>
+                    @endif
+                    @if($wrongMove)
+                        <div class="w-full text-center mt-3 mb-2">
+                            <div class="text-red-500">Wrong!</div>
+                        </div>
+                        <div class="text-center w-full">Correct Move</div>
+                        @if($correctMoveNotation)
+                            <div class="text-center w-full">{{ $correctMoveNotation }}</div>
+                        @endif
+                    @endif
+                </div>
+            @endif
             @if(count($this->openings) == 0)
-            <form wire:submit.prevent="setOpenings"
-                  class="w-full px-3" >
-                {{ $this->form }}
+                <form wire:submit.prevent="setOpenings"
+                      class="w-full px-3 flex flex-col h-full pb-3 justify-between">
+                    <div>
+                        {{ $this->form }}
+                    </div>
 
-                <x-filament::button type="submit">
-                    Set Openings
-                </x-filament::button>
-            </form>
+                    <x-filament::button type="submit">
+                        Set Openings
+                    </x-filament::button>
+                </form>
             @endif
 
-            @if($this->openings)
-                <x-filament::button wire:click="startAttempt">Start Training</x-filament::button>
-            @endif
+            <div>
+                @if($this->openings && is_null($this->attempt))
+                    <x-filament::button wire:click="startAttempt">Start</x-filament::button>
+                @endif
+            </div>
+
             <div>
                 @if($wrongMove)
-                    <div>
-                        <div class="text-red-500">Wrong!</div>
-                    </div>
-                    <div class="text-center w-full">Correct Move</div>
-                    @if($correctMoveNotation)
-                        <div class="text-center w-full">{{ $correctMoveNotation }}</div>
-                    @endif
+                    <x-filament::button wire:click="startAttempt">Play Again</x-filament::button>
                 @endif
             </div>
         </div>

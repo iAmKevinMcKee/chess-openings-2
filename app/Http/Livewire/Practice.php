@@ -20,7 +20,7 @@ class Practice extends Component implements HasForms
 
     public $formData;
     public $attempt = null;
-    public $trainingSession;
+    public $trainingSession = null;
     public $correctMoveNotation;
     public $playAsWhite = false;
     public $wrongMove = null;
@@ -28,11 +28,7 @@ class Practice extends Component implements HasForms
 
     public function mount(): void
     {
-        $this->trainingSession = TrainingSession::create([
-            'user_id' => auth()->user()->id,
-        ]);
-
-        $this->openings = session()->get('openings') ?? [];
+//        $this->openings = session()->get('openings') ?? [];
         $this->form->fill([
             'openings' => $this->openings,
         ]);
@@ -42,11 +38,26 @@ class Practice extends Component implements HasForms
     {
         return $form
             ->schema([
+                Select::make('is_white')
+                    ->label('Play as')
+                    ->required()
+                    ->reactive()
+                    ->options([
+                        1 => 'White',
+                        0 => 'Black',
+                    ]),
                 Select::make('openings')
                     ->searchable()
                     ->multiple()
                     ->required()
-                    ->options(Opening::where('user_id', auth()->user()->id)->pluck('name', 'id'))
+                    ->options(function ($get) {
+                        if(!is_null($get('is_white'))) {
+                            return Opening::where('user_id', auth()->user()->id)
+                                ->where('is_white', $get('is_white'))
+                                ->pluck('name', 'id');
+                        }
+                        return [];
+                    })
             ])
             ->statePath('formData');
     }
@@ -54,9 +65,20 @@ class Practice extends Component implements HasForms
     public function setOpenings()
     {
         $form = $this->form->getState();
+        if($form['is_white'] == 1) {
+            $this->playAsWhite = true;
+        } else {
+            $this->playAsWhite = false;
+        }
         $this->openings = $form['openings'];
         session()->put('openings', $this->openings);
+
+        $this->trainingSession = TrainingSession::create([
+            'user_id' => auth()->user()->id,
+        ]);
+
         Notification::make()->success()->title('openings are set')->send();
+        $this->startAttempt();
     }
 
     public function startAttempt()
@@ -67,9 +89,15 @@ class Practice extends Component implements HasForms
         $openingId = collect($this->openings)->random();
         $this->attempt = Attempt::create([
             'user_id' => auth()->user()->id,
-            'opening_id' => (int) $openingId,
+            'opening_id' => (int)$openingId,
             'training_session_id' => $this->trainingSession->id,
         ]);
+
+        if($this->playAsWhite == false) {
+            $this->setPossibleMoves('rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1');
+            $move = $this->randomlyPickAPossibleMoveBasedOnProbability();
+            $this->dispatchBrowserEvent('next', ['notation' => $move->notation]);
+        }
     }
 
     public function move($fromFen, $toFen, $moveFrom, $moveTo, $color, $notation)
@@ -77,7 +105,6 @@ class Practice extends Component implements HasForms
         // find the correct move based on the $fromFen
         $correctMove = CorrectMove::where('from_fen', $fromFen)
             ->where('opening_id', $this->attempt->opening_id)
-            ->where('is_white', $this->playAsWhite)
             ->where('user_id', auth()->id())
             ->get()->first();
         if ($correctMove->to_fen === $toFen) {
@@ -88,12 +115,7 @@ class Practice extends Component implements HasForms
                 'correct' => 1,
             ]);
             $this->wrongMove = false;
-            $this->possibleMoves = PossibleMove::where('is_white', $this->playAsWhite)
-                ->where('opening_id', $this->attempt->opening_id)
-                ->where('fen', $toFen)
-                ->where('user_id', auth()->id())
-                ->orderBy('probability', 'desc')
-                ->get();
+            $this->setPossibleMoves($toFen);
             if ($this->possibleMoves->count() === 0) {
                 // if no possible moves, then the round is over and the user has won
                 $this->attempt->update([
@@ -102,7 +124,8 @@ class Practice extends Component implements HasForms
                 $this->trainingSession->update([
                     'correct' => $this->trainingSession->correct + 1,
                 ]);
-                Notification::make()->success()->title('You Won!')->send();
+
+                $this->startAttempt();
             } else {
                 Notification::make()->success()->title('Correct!')->send();
 
@@ -126,6 +149,7 @@ class Practice extends Component implements HasForms
             $this->trainingSession->update([
                 'incorrect' => $this->trainingSession->incorrect + 1,
             ]);
+
         }
     }
 
@@ -145,5 +169,15 @@ class Practice extends Component implements HasForms
             }
         }
         return null;
+    }
+
+    private function setPossibleMoves($toFen): void
+    {
+        $this->possibleMoves = PossibleMove::where('is_white', $this->playAsWhite)
+            ->where('opening_id', $this->attempt->opening_id)
+            ->where('fen', $toFen)
+            ->where('user_id', auth()->id())
+            ->orderBy('probability', 'desc')
+            ->get();
     }
 }

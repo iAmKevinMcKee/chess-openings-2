@@ -9,6 +9,11 @@ class Opening extends Model
 {
     use HasFactory;
 
+    public function attempts()
+    {
+        return $this->hasMany(Attempt::class);
+    }
+
     public function correctMoves()
     {
         return $this->hasMany(CorrectMove::class);

@@ -62,7 +62,7 @@ class Openings extends Component implements HasForms
                             ->label('Opening Name')
                             ->required(),
                         Select::make('is_white')
-                            ->label('Play as...')
+                            ->label('Play as')
                             ->options([
                                 1 => 'White',
                                 0 => 'Black',
@@ -169,60 +169,53 @@ class Openings extends Component implements HasForms
                     ->get();
             }
             // if playing as black and this is a black move, save as correct move
+            if ($this->playAsWhite == false && $color === 'black') {
+                CorrectMove::updateOrCreate([
+                    'is_white' => 0,
+                    'from_fen' => $fromFen,
+                    'opening_id' => $this->opening->id,
+                    'user_id' => auth()->id(),
+                ], [
+                    'to_fen' => $toFen,
+                    'move_from' => $moveFrom,
+                    'move_to' => $moveTo,
+                    'notation' => $notation,
+                ]);
+
+                $this->possibleMoves = PossibleMove::where('is_white', 0)
+                    ->where('fen', $toFen)
+                    ->where('opening_id', $this->opening->id)
+                    ->where('user_id', auth()->id())
+                    ->get();
+            }
             // if playing as black and this is a white move, save as possible move
-//            PossibleMove::firstOrCreate([
-//                'fen' => $fen,
-//            ], [
-//
-//            ]);
-        } else {
-            // check if this move was correct (or maybe that's already done on the front end)
-            // if it was correct, make the next move or show a success message if this is the end
-            $correctMove = CorrectMove::where('from_fen', $fromFen)
-                ->where('is_white', $this->playAsWhite)
-                ->where('user_id', auth()->id())
-                ->get()->first();
+            if ($this->playAsWhite == false && $color !== 'black') {
+                PossibleMove::updateOrCreate([
+                    'is_white' => 0,
+                    'fen' => $fromFen,
+                    'move_from' => $moveFrom,
+                    'move_to' => $moveTo,
+                    'notation' => $notation,
+                    'opening_id' => $this->opening->id,
+                    'user_id' => auth()->id(),
+                ]);
 
-            if ($correctMove) {
-                $this->correctMove = $correctMove;
-                if ($correctMove->to_fen === $toFen) {
-                    $this->wrongMove = false;
-                    $this->possibleMoves = PossibleMove::where('is_white', $this->playAsWhite)
-                        ->where('fen', $toFen)
-                        ->where('user_id', auth()->id())
-                        ->orderBy('probability', 'desc')
-                        ->get();
-                    // randomly pick a possible move based on probability
-                    $totalProbability = $this->possibleMoves->sum('probability');
-                    $randomNumber = rand(0, $totalProbability);
-                    foreach ($this->possibleMoves as $move) {
-                        $randomNumber -= $move->probability;
-                        if ($randomNumber <= 0) {
-                            $this->dispatchBrowserEvent('next', ['notation' => $move->notation]);
-//                            $this->dispatchBrowserEvent('next', ['fen' => $move->fen]);
-//            $this->dispatchBrowserEvent('next', ['fen' => 'rnbqkbnr/pppp1ppp/8/4p3/4P3/8/PPPP1PPP/RNBQKBNR w KQkq e6 0 2']);
-
-                            break;
-                        }
-                    }
-
-                } else {
-                    $this->wrongMove = true;
-                }
-            } else {
-                $this->correctMove = null;
+                $this->possibleMoves = PossibleMove::where('is_white', 0)
+                    ->where('fen', $fromFen)
+                    ->where('opening_id', $this->opening->id)
+                    ->where('user_id', auth()->id())
+                    ->get();
             }
 
-//            $this->dispatchBrowserEvent('next', ['fen' => 'rnbqkbnr/pppp1ppp/8/4p3/4P3/8/PPPP1PPP/RNBQKBNR w KQkq e6 0 2']);
         }
-        $correctMove = CorrectMove::query()->where('from_fen', $toFen)
-            ->where('is_white', $this->playAsWhite)->where('user_id', auth()->id())->get()->first();
-
-        if ($correctMove) {
-            $this->correctMove = $correctMove;
-        } else {
-            $this->correctMove = null;
-        }
+//        $correctMove = CorrectMove::query()->where('from_fen', $toFen)
+//            ->where('is_white', $this->playAsWhite)->where('user_id', auth()->id())->get()->first();
+//
+//        if ($correctMove) {
+//            $this->correctMove = $correctMove;
+//        } else {
+//            $this->correctMove = null;
+//        }
     }
 
     public
