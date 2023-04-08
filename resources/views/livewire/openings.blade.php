@@ -10,6 +10,21 @@
                 this.chessjs.load(fen);
                 this.updateBoard();
             },
+            trainingCorrectMove() {
+                if( this.chessjs.turn() === 'b' && this.playAsWhite ) {
+                    return false;
+                }
+                if( this.chessjs.turn() === 'w' && this.playAsWhite ) {
+                    return true;
+                }
+                if( this.chessjs.turn() === 'b' && this.playAsWhite === false ) {
+                    return true;
+                }
+                if( this.chessjs.turn() === 'w' && this.playAsWhite === false ) {
+                    return false;
+                }
+
+            },
             updateBoard() {
                 let squares = document.querySelectorAll('#chess-board > div > div');
                 squares.forEach((square) => {
@@ -64,15 +79,8 @@
                 Set Openings
             </x-filament::button>
         </form>
-        @if(! $recording)
-            <button wire:click="$set('recording', true)">Start Recording</button>
-        @else
-            <button wire:click="$set('recording', false)">Stop Recording</button>
+        @if($opening)
             <div>Opening: {{$opening->name}}</div>
-            <div>
-                <input type="text" wire:model.defer="newOpeningName"/>
-                <button wire:click="createAndSetOpening">Create and Set</button>
-            </div>
         @endif
     </div>
     <div class="flex">
@@ -94,6 +102,17 @@
                 $wire.call('move', previousFen, chessjs.fen(), previouslySelectedSquare, selectedSquare, color, chessjs.history().slice(-1)[0] );
                 console.log(chessjs.fen());
             }
+
+            if(chessjs.get(previouslySelectedSquare).type === 'k'
+                && chessjs.get(previouslySelectedSquare).color === 'b'
+                && selectedSquare === 'g8') {
+                console.log('black king side castling');
+                let previousFen = chessjs.fen();
+                let color = chessjs.turn() === 'w' ? 'white' : 'black';
+                chessjs.move('O-O');
+                $wire.call('move', previousFen, chessjs.fen(), previouslySelectedSquare, selectedSquare, color, chessjs.history().slice(-1)[0] );
+                console.log(chessjs.fen());
+            }
         }
 
         if(possibleMoves.length && Object.values(possibleMoves).includes('OO') === true) {
@@ -101,6 +120,17 @@
                 && chessjs.get(previouslySelectedSquare).color === 'w'
                 && selectedSquare === 'c1') {
                 console.log('white queen side castling');
+                let previousFen = chessjs.fen();
+                let color = chessjs.turn() === 'w' ? 'white' : 'black';
+                chessjs.move('O-O-O');
+                $wire.call('move', previousFen, chessjs.fen(), previouslySelectedSquare, selectedSquare, color, chessjs.history().slice(-1)[0] );
+                console.log(chessjs.fen());
+            }
+
+            if(chessjs.get(previouslySelectedSquare).type === 'k'
+                && chessjs.get(previouslySelectedSquare).color === 'b'
+                && selectedSquare === 'c8') {
+                console.log('black queen side castling');
                 let previousFen = chessjs.fen();
                 let color = chessjs.turn() === 'w' ? 'white' : 'black';
                 chessjs.move('O-O-O');
@@ -339,18 +369,14 @@
             </div>
         </div>
         <div class="justify-center flex-1">
-            <button x-on:click="chessjs.undo(); updateBoard();">Go Back</button>
+            <button x-on:click="chessjs.undo(); updateBoard(); $wire.call('goBack', chessjs.fen(), chessjs.turn())">Go Back</button>
             <div>
-                <div>
-                    @if($wrongMove)
-                        <div class="text-red-500">Wrong!</div>
-                    @endif
-                </div>
-                <div class="text-center w-full">Possible Moves</div>
-                <div class="flex flex-col">
+                <div
+                    x-show="!trainingCorrectMove()"
+                    class="flex flex-col">
+                    <div class="text-center w-full">Possible Moves</div>
                     @if($possibleMoves)
                         <div>
-
                             @foreach($possibleMoves->sortByDesc('probability') as $mv)
                                 <div id="possible-move-{{$loop->index}}"
                                      x-data="{ probability: {{ $mv['probability'] }} }" class="flex flex-row flex-1">
@@ -362,16 +388,18 @@
                                     </button>
                                 </div>
                             @endforeach
-
-                            @endif
                         </div>
+                    @endif
                 </div>
-                <div class="text-center w-full">Correct Move</div>
-                @if($correctMove)
-                    <div class="text-center w-full">{{ $correctMove->notation }}</div>
-                @else
-                    <div class="text-center w-full text-red-700">None Recorded</div>
-                @endif
+                <div x-show="trainingCorrectMove()">
+                    <div class="text-center w-full">Correct Move</div>
+                    @if($correctMove)
+                        <div class="text-center w-full">{{ $correctMove->notation }}</div>
+                    @else
+                        <div class="text-center w-full text-red-700">None Recorded</div>
+                    @endif
+                </div>
+
             </div>
         </div>
         <x-filament-actions::modals/>

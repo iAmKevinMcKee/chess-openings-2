@@ -2,12 +2,13 @@
 
 namespace App\Models;
 
+use App\Models\Traits\BelongsToUser;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class Attempt extends Model
 {
-    use HasFactory;
+    use HasFactory, BelongsToUser;
 
     public function opening()
     {

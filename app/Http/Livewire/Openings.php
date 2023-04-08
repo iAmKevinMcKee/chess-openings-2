@@ -17,7 +17,6 @@ class Openings extends Component implements HasForms
 {
     use InteractsWithForms;
 
-    public $recording = true;
     public $playAsWhite = false;
     public $opening = null;
 
@@ -26,7 +25,6 @@ class Openings extends Component implements HasForms
     public $newOpeningName = '';
 
     public $correctMove;
-    public $wrongMove = false;
 
     public $formData = [];
 
@@ -34,8 +32,6 @@ class Openings extends Component implements HasForms
 
     public function mount()
     {
-        $this->opening = Opening::first() ?? new Opening();
-
         if ($this->playAsWhite) {
             $correctMove = CorrectMove::query()->where('from_fen', 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1')
                 ->where('is_white', $this->playAsWhite)->where('user_id', auth()->id())->get()->first();
@@ -76,11 +72,13 @@ class Openings extends Component implements HasForms
                             'user_id' => auth()->id(),
                         ]);
 
-                        if($opening->is_white) {
+                        if ($opening->is_white) {
                             $this->playAsWhite = true;
                         } else {
                             $this->playAsWhite = false;
                         }
+
+                        $this->opening = $opening;
 
                         Notification::make()->title('Opening Created. Start Training')->success()->send();
                     })
@@ -99,11 +97,25 @@ class Openings extends Component implements HasForms
     public function setOpening()
     {
         $this->opening = Opening::find($this->formData['openings']);
-        if($this->opening->is_white) {
+        if ($this->opening->is_white) {
             $this->playAsWhite = true;
         } else {
             $this->playAsWhite = false;
         }
+
+        if($this->playAsWhite) {
+            $correctMove = CorrectMove::query()->where('from_fen', 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1')
+                ->where('is_white', $this->playAsWhite)->where('user_id', auth()->id())->get()->first();
+
+            if ($correctMove) {
+                $this->correctMove = $correctMove;
+            } else {
+                $this->correctMove = null;
+            }
+        } else {
+            $this->possibleMoves = $this->opening->possibleMoves()->where('from_fen', 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1')->get();
+        }
+
         Notification::make()->title('Opening Set. Start Training')->success()->send();
     }
 
@@ -123,103 +135,102 @@ class Openings extends Component implements HasForms
         $this->opening = $opening;
     }
 
-    public
-    function move($fromFen, $toFen, $moveFrom, $moveTo, $color, $notation)
+    public function move($fromFen, $toFen, $moveFrom, $moveTo, $color, $notation)
     {
-        if ($this->recording) {
-            // if playing as white and this is a white move, save as correct move
-            if ($this->playAsWhite && $color === 'white') {
-                CorrectMove::updateOrCreate([
-                    'is_white' => 1,
-                    'from_fen' => $fromFen,
-                    'opening_id' => $this->opening->id,
-                    'user_id' => auth()->id(),
-                ], [
-                    'to_fen' => $toFen,
-                    'move_from' => $moveFrom,
-                    'move_to' => $moveTo,
-                    'notation' => $notation,
-                ]);
+        // if playing as white and this is a white move, save as correct move
+        if ($this->playAsWhite && $color === 'white') {
+            $correctMove = CorrectMove::updateOrCreate([
+                'is_white' => 1,
+                'from_fen' => $fromFen,
+                'opening_id' => $this->opening->id,
+                'user_id' => auth()->id(),
+            ], [
+                'to_fen' => $toFen,
+                'move_from' => $moveFrom,
+                'move_to' => $moveTo,
+                'notation' => $notation,
+            ]);
 
-                $this->possibleMoves = PossibleMove::where('is_white', 1)
-                    ->where('fen', $toFen)
-                    ->where('opening_id', $this->opening->id)
-                    ->where('user_id', auth()->id())
-                    ->get();
-
-                ray($this->possibleMoves);
-
-            }
-            // if playing as white and this is a black move, save as possible move
-            if ($this->playAsWhite && $color === 'black') {
-                PossibleMove::updateOrCreate([
-                    'is_white' => 1,
-                    'fen' => $fromFen,
-                    'move_from' => $moveFrom,
-                    'move_to' => $moveTo,
-                    'notation' => $notation,
-                    'opening_id' => $this->opening->id,
-                    'user_id' => auth()->id(),
-                ]);
-
-                $this->possibleMoves = PossibleMove::where('is_white', 1)
-                    ->where('fen', $fromFen)
-                    ->where('opening_id', $this->opening->id)
-                    ->where('user_id', auth()->id())
-                    ->get();
-            }
-            // if playing as black and this is a black move, save as correct move
-            if ($this->playAsWhite == false && $color === 'black') {
-                CorrectMove::updateOrCreate([
-                    'is_white' => 0,
-                    'from_fen' => $fromFen,
-                    'opening_id' => $this->opening->id,
-                    'user_id' => auth()->id(),
-                ], [
-                    'to_fen' => $toFen,
-                    'move_from' => $moveFrom,
-                    'move_to' => $moveTo,
-                    'notation' => $notation,
-                ]);
-
-                $this->possibleMoves = PossibleMove::where('is_white', 0)
-                    ->where('fen', $toFen)
-                    ->where('opening_id', $this->opening->id)
-                    ->where('user_id', auth()->id())
-                    ->get();
-            }
-            // if playing as black and this is a white move, save as possible move
-            if ($this->playAsWhite == false && $color !== 'black') {
-                PossibleMove::updateOrCreate([
-                    'is_white' => 0,
-                    'fen' => $fromFen,
-                    'move_from' => $moveFrom,
-                    'move_to' => $moveTo,
-                    'notation' => $notation,
-                    'opening_id' => $this->opening->id,
-                    'user_id' => auth()->id(),
-                ]);
-
-                $this->possibleMoves = PossibleMove::where('is_white', 0)
-                    ->where('fen', $fromFen)
-                    ->where('opening_id', $this->opening->id)
-                    ->where('user_id', auth()->id())
-                    ->get();
-            }
-
+            $this->possibleMoves = $correctMove->possibleMoves;
         }
-//        $correctMove = CorrectMove::query()->where('from_fen', $toFen)
-//            ->where('is_white', $this->playAsWhite)->where('user_id', auth()->id())->get()->first();
-//
-//        if ($correctMove) {
-//            $this->correctMove = $correctMove;
-//        } else {
-//            $this->correctMove = null;
-//        }
+        // if playing as white and this is a black move, save as possible move
+        if ($this->playAsWhite && $color === 'black') {
+            $possibleMove = PossibleMove::updateOrCreate([
+                'is_white' => 1,
+                'from_fen' => $fromFen,
+                'to_fen' => $toFen,
+                'move_from' => $moveFrom,
+                'move_to' => $moveTo,
+                'notation' => $notation,
+                'opening_id' => $this->opening->id,
+                'user_id' => auth()->id(),
+            ]);
+
+            $this->possibleMoves = PossibleMove::where('is_white', 1)
+                ->where('from_fen', $fromFen)
+                ->where('opening_id', $this->opening->id)
+                ->where('user_id', auth()->id())
+                ->get();
+
+            $this->correctMove = $possibleMove->correctMove;
+        }
+        // if playing as black and this is a black move, save as correct move
+        if ($this->playAsWhite == false && $color === 'black') {
+            CorrectMove::updateOrCreate([
+                'is_white' => 0,
+                'from_fen' => $fromFen,
+                'opening_id' => $this->opening->id,
+                'user_id' => auth()->id(),
+            ], [
+                'to_fen' => $toFen,
+                'move_from' => $moveFrom,
+                'move_to' => $moveTo,
+                'notation' => $notation,
+            ]);
+
+            $this->possibleMoves = PossibleMove::where('is_white', 0)
+                ->where('from_fen', $toFen)
+                ->where('opening_id', $this->opening->id)
+                ->where('user_id', auth()->id())
+                ->get();
+
+            $this->correctMove = null;
+        }
+        // if playing as black and this is a white move, save as possible move
+        if ($this->playAsWhite == false && $color !== 'black') {
+
+            $possibleMove = PossibleMove::updateOrCreate([
+                'is_white' => $this->playAsWhite,
+                'from_fen' => $fromFen,
+                'to_fen' => $toFen,
+                'move_from' => $moveFrom,
+                'move_to' => $moveTo,
+                'notation' => $notation,
+                'opening_id' => $this->opening->id,
+                'user_id' => auth()->id(),
+            ]);
+
+            $this->possibleMoves = PossibleMove::where('is_white', $this->playAsWhite)
+                ->where('from_fen', $fromFen)
+                ->where('opening_id', $this->opening->id)
+                ->where('user_id', auth()->id())
+                ->get();
+
+            $this->correctMove = $possibleMove->correctMove;
+        }
     }
 
-    public
-    function render()
+    public function goBack($fen, $turn)
+    {
+        ray($fen, $turn);
+        if($turn === 'b' && $this->playAsWhite === true) {
+            $this->possiblemoves = $this->opening->possibleMoves()->where('from_fen', $fen)->get();
+        } elseif ($turn === 'w' && $this->playAsWhite === true) {
+            $this->correctMove = $this->opening->correctMoves()->where('from_fen', $fen)->get()->first();
+        }
+    }
+
+    public function render()
     {
         return view('livewire.openings');
     }

@@ -15,8 +15,9 @@ return new class extends Migration
     {
         Schema::create('possible_moves', function (Blueprint $table) {
             $table->id();
-            $table->string('fen');
             $table->boolean('is_white')->default(1);
+            $table->string('from_fen');
+            $table->string('to_fen');
             $table->string('move_from');
             $table->string('move_to');
             $table->string('notation');

@@ -98,6 +98,17 @@
                 $wire.call('move', previousFen, chessjs.fen(), previouslySelectedSquare, selectedSquare, color, chessjs.history().slice(-1)[0] );
                 console.log(chessjs.fen());
             }
+
+            if(chessjs.get(previouslySelectedSquare).type === 'k'
+                && chessjs.get(previouslySelectedSquare).color === 'b'
+                && selectedSquare === 'g8') {
+                console.log('black king side castling');
+                let previousFen = chessjs.fen();
+                let color = chessjs.turn() === 'w' ? 'white' : 'black';
+                chessjs.move('O-O');
+                $wire.call('move', previousFen, chessjs.fen(), previouslySelectedSquare, selectedSquare, color, chessjs.history().slice(-1)[0] );
+                console.log(chessjs.fen());
+            }
         }
 
         if(possibleMoves.length && Object.values(possibleMoves).includes('OO') === true) {
@@ -105,6 +116,17 @@
                 && chessjs.get(previouslySelectedSquare).color === 'w'
                 && selectedSquare === 'c1') {
                 console.log('white queen side castling');
+                let previousFen = chessjs.fen();
+                let color = chessjs.turn() === 'w' ? 'white' : 'black';
+                chessjs.move('O-O-O');
+                $wire.call('move', previousFen, chessjs.fen(), previouslySelectedSquare, selectedSquare, color, chessjs.history().slice(-1)[0] );
+                console.log(chessjs.fen());
+            }
+
+            if(chessjs.get(previouslySelectedSquare).type === 'k'
+                && chessjs.get(previouslySelectedSquare).color === 'b'
+                && selectedSquare === 'c8') {
+                console.log('black queen side castling');
                 let previousFen = chessjs.fen();
                 let color = chessjs.turn() === 'w' ? 'white' : 'black';
                 chessjs.move('O-O-O');
@@ -307,7 +329,7 @@
                                 </div>
                             </dd>
                         </div>
-                    </dl>
+                    </dl>o
                     @if($attempt)
                         <h3 class="text-2xl text-center mt-2 font-semibold leading-6 text-gray-900">{{$attempt->opening->name}}</h3>
                     @endif

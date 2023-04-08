@@ -2,12 +2,13 @@
 
 namespace App\Models;
 
+use App\Models\Traits\BelongsToUser;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class Opening extends Model
 {
-    use HasFactory;
+    use HasFactory, BelongsToUser;
 
     public function attempts()
     {
@@ -17,5 +18,15 @@ class Opening extends Model
     public function correctMoves()
     {
         return $this->hasMany(CorrectMove::class);
+    }
+
+    public function possibleMoves()
+    {
+        return $this->hasMany(PossibleMove::class);
+    }
+
+    public function firstMove()
+    {
+        return $this->hasOne(CorrectMove::class)->where('move_number', 1);
     }
 }

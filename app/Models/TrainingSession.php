@@ -2,17 +2,13 @@
 
 namespace App\Models;
 
+use App\Models\Traits\BelongsToUser;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class TrainingSession extends Model
 {
-    use HasFactory;
-
-    public function user()
-    {
-        return $this->belongsTo(User::class);
-    }
+    use HasFactory, BelongsToUser;
 
     public function totalAttempts()
     {
