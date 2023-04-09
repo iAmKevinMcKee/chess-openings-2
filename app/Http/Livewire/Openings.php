@@ -3,6 +3,7 @@
 namespace App\Http\Livewire;
 
 use App\Models\CorrectMove;
+use App\Models\LichessPossibleMoves;
 use App\Models\Opening;
 use App\Models\PossibleMove;
 use Filament\Forms\Components\Select;
@@ -11,11 +12,16 @@ use Filament\Forms\Concerns\InteractsWithForms;
 use Filament\Forms\Contracts\HasForms;
 use Filament\Forms\Form;
 use Filament\Notifications\Notification;
+use Filament\Tables\Columns\Column;
+use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Concerns\InteractsWithTable;
+use Filament\Tables\Contracts\HasTable;
+use Filament\Tables\Table;
 use Livewire\Component;
 
-class Openings extends Component implements HasForms
+class Openings extends Component implements HasForms, HasTable
 {
-    use InteractsWithForms;
+    use InteractsWithForms, InteractsWithTable;
 
     public $playAsWhite = false;
     public $opening = null;
@@ -27,6 +33,7 @@ class Openings extends Component implements HasForms
     public $correctMove;
 
     public $formData = [];
+    public $currentFen = 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1';
 
     public $lichessPossibleMoves;
 
@@ -113,7 +120,8 @@ class Openings extends Component implements HasForms
                 $this->correctMove = null;
             }
         } else {
-            $this->possibleMoves = $this->opening->possibleMoves()->where('from_fen', 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1')->get();
+            $this->currentFen = 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1';
+            $this->possibleMoves = $this->opening->possibleMoves()->where('from_fen', $this->currentFen)->get();
         }
 
         Notification::make()->title('Opening Set. Start Training')->success()->send();
@@ -137,6 +145,7 @@ class Openings extends Component implements HasForms
 
     public function move($fromFen, $toFen, $moveFrom, $moveTo, $color, $notation)
     {
+        $this->currentFen = $toFen;
         // if playing as white and this is a white move, save as correct move
         if ($this->playAsWhite && $color === 'white') {
             $correctMove = CorrectMove::updateOrCreate([
@@ -223,11 +232,24 @@ class Openings extends Component implements HasForms
     public function goBack($fen, $turn)
     {
         ray($fen, $turn);
+        $this->currentFen = $fen;
         if($turn === 'b' && $this->playAsWhite === true) {
             $this->possiblemoves = $this->opening->possibleMoves()->where('from_fen', $fen)->get();
         } elseif ($turn === 'w' && $this->playAsWhite === true) {
             $this->correctMove = $this->opening->correctMoves()->where('from_fen', $fen)->get()->first();
         }
+    }
+
+    public function table(Table $table): Table
+    {
+        ray($this->currentFen);
+        return $table
+            ->query(LichessPossibleMoves::setFen($this->currentFen)->query())
+            ->columns([
+                TextColumn::make('notation'),
+                TextColumn::make('percent')->sortable(),
+                TextColumn::make('white_wins')
+            ])->defaultSort('percent', 'desc');
     }
 
     public function render()

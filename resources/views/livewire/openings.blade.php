@@ -399,6 +399,10 @@
                         <div class="text-center w-full text-red-700">None Recorded</div>
                     @endif
                 </div>
+                <div>Current FEN: {{$currentFen}}</div>
+                <div>
+                    {{$this->table}}
+                </div>
 
             </div>
         </div>

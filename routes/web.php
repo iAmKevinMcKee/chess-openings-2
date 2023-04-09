@@ -1,5 +1,6 @@
 <?php
 
+use App\Models\LichessPossibleMoves;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -15,9 +16,10 @@ use Illuminate\Support\Facades\Route;
 
 Route::get('lichess', function () {
     $fen = 'rnbqkb1r/pppp1ppp/5n2/4p3/2B1P3/5N2/PPPP1PPP/RNBQK2R b KQkq - 3 3';
-    $fen = urlencode($fen);
-    $response = \Illuminate\Support\Facades\Http::get('https://explorer.lichess.ovh/lichess?variant=standard&speeds=blitz,rapid,classical&ratings=1000,2500&fen=' . $fen);
-    dd($response->json());
+//    $fen = urlencode($fen);
+//    $response = \Illuminate\Support\Facades\Http::get('https://explorer.lichess.ovh/lichess?variant=standard&speeds=blitz,rapid,classical&ratings=1000,2500&fen=' . $fen);
+    $hi = LichessPossibleMoves::setFen($fen);
+    dd($hi->getRows());
 });
 
 Route::get('/', function () {
