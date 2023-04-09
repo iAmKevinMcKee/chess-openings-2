@@ -31,6 +31,7 @@ class Openings extends Component implements HasForms, HasTable
     public $newOpeningName = '';
 
     public $correctMove;
+    public $showLichess = false;
 
     public $formData = [];
     public $currentFen = 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1';
@@ -145,6 +146,7 @@ class Openings extends Component implements HasForms, HasTable
 
     public function move($fromFen, $toFen, $moveFrom, $moveTo, $color, $notation)
     {
+        $this->showLichess = false;
         $this->currentFen = $toFen;
         // if playing as white and this is a white move, save as correct move
         if ($this->playAsWhite && $color === 'white') {
@@ -231,7 +233,7 @@ class Openings extends Component implements HasForms, HasTable
 
     public function goBack($fen, $turn)
     {
-        ray($fen, $turn);
+        $this->showLichess = false;
         $this->currentFen = $fen;
         if($turn === 'b' && $this->playAsWhite === true) {
             $this->possiblemoves = $this->opening->possibleMoves()->where('from_fen', $fen)->get();
@@ -240,11 +242,23 @@ class Openings extends Component implements HasForms, HasTable
         }
     }
 
+    public function showLichess()
+    {
+        $this->showLichess = true;
+    }
+
+//    @var Table
     public function table(Table $table): Table
     {
-        ray($this->currentFen);
         return $table
-            ->query(LichessPossibleMoves::setFen($this->currentFen)->query())
+            ->query(function() {
+                $currentFen = $this->currentFen;
+                if($this->showLichess == false) {
+
+                    $currentFen = '';
+                }
+                return LichessPossibleMoves::setFen($currentFen)->query();
+            })
             ->columns([
                 TextColumn::make('notation'),
                 TextColumn::make('percent')->sortable(),

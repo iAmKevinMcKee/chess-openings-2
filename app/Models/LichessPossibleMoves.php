@@ -25,6 +25,9 @@ class LichessPossibleMoves extends Model
 
     public function getRows()
     {
+        if(self::$fen == '') {
+            return [];
+        }
         ray(self::$fen);
         $moves = \Illuminate\Support\Facades\Http::get('https://explorer.lichess.ovh/lichess?variant=standard&speeds=blitz,rapid,classical&ratings=1000,2000&fen=' . self::$fen);
         $total = $moves->json()['white'] + $moves->json()['black'] + $moves->json()['draws'];

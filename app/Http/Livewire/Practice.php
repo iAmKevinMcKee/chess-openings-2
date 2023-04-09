@@ -175,7 +175,7 @@ class Practice extends Component implements HasForms
     {
         $this->possibleMoves = PossibleMove::where('is_white', $this->playAsWhite)
             ->where('opening_id', $this->attempt->opening_id)
-            ->where('fen', $toFen)
+            ->where('from_fen', $toFen)
             ->where('user_id', auth()->id())
             ->orderBy('probability', 'desc')
             ->get();

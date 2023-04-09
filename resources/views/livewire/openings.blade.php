@@ -399,10 +399,18 @@
                         <div class="text-center w-full text-red-700">None Recorded</div>
                     @endif
                 </div>
-                <div>Current FEN: {{$currentFen}}</div>
                 <div>
-                    {{$this->table}}
+                    @if(!$showLichess)
+                        <x-filament::button x-on:click="$wire.call('showLichess')">
+                            Show Lichess
+                        </x-filament::button>
+                    @else
+                        <div>
+                            {{$this->table}}
+                        </div>
+                    @endif
                 </div>
+
 
             </div>
         </div>
