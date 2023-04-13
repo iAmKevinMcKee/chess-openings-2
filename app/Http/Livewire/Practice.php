@@ -25,6 +25,10 @@ class Practice extends Component implements HasForms
     public $playAsWhite = false;
     public $wrongMove = null;
     public $openings = [];
+    public $correctMove = null;
+    public $hintOne;
+    public $hintTwo;
+
 
     public function mount(): void
     {
@@ -96,21 +100,27 @@ class Practice extends Component implements HasForms
         if($this->playAsWhite == false) {
             $this->setPossibleMoves('rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1');
             $move = $this->randomlyPickAPossibleMoveBasedOnProbability();
+            $this->correctMove = $move->correctMove;
             $this->dispatchBrowserEvent('next', ['notation' => $move->notation]);
         }
     }
 
-    public function move($fromFen, $toFen, $moveFrom, $moveTo, $color, $notation)
+    public function showHintOne($fromFen)
     {
-        // find the correct move based on the $fromFen
         $correctMove = CorrectMove::where('from_fen', $fromFen)
             ->where('opening_id', $this->attempt->opening_id)
             ->where('user_id', auth()->id())
             ->get()->first();
-        if ($correctMove->to_fen === $toFen) {
+
+        $this->hintOne = $correctMove->hint_one;
+    }
+
+    public function move($fromFen, $toFen, $moveFrom, $moveTo, $color, $notation)
+    {
+        if ($this->correctMove->to_fen === $toFen) {
             // if the move is correct, check if there are any possible moves for the new position
             $this->attempt->attempt_moves()->create([
-                'move_number' => 1, // fix this once I can get online to check the chessjs docs
+                'move_number' => 1, // TODO fix this once I can get online to check the chessjs docs
                 'notation' => $notation,
                 'correct' => 1,
             ]);
@@ -127,15 +137,14 @@ class Practice extends Component implements HasForms
 
                 $this->startAttempt();
             } else {
-                Notification::make()->success()->title('Correct!')->send();
-
                 // if there are possible moves, then randomly pick one based on probability
                 $move = $this->randomlyPickAPossibleMoveBasedOnProbability();
+                $this->correctMove = $move->correctMove;
                 $this->dispatchBrowserEvent('next', ['notation' => $move->notation]);
             }
         } else {
             $this->wrongMove = true;
-            $this->correctMoveNotation = $correctMove->notation;
+            $this->correctMoveNotation = $this->correctMove->notation;
             // move is incorrect, show a message that it was not correct and show the correct move
             $this->attempt->attempt_moves()->create([
                 'move_number' => 1, // fix this once I can get online to check the chessjs docs

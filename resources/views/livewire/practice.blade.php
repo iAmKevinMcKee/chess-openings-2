@@ -4,6 +4,9 @@
             chessjs: null,
             selectedSquare: null,
             previouslySelectedSquare: null,
+            showHints: false,
+            showHintOne: false,
+            showHintTwo: false,
 
             possibleMoves: [],
             loadFen(fen) {
@@ -13,6 +16,12 @@
             resetBoard() {
                 chessjs.load('rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1');
                 updateBoard();
+            },
+            updateHints() {
+                if(this.showHints === false) {
+                    this.showHintOne = false;
+                    this.showHintTwo = false;
+                }
             },
             updateBoard() {
                 this.selectedSquare = null;
@@ -73,6 +82,7 @@
             "
              x-on:next.window="
                 chessjs.move($event.detail.notation);
+                updateHints();
                 updateBoard();
                 "
              x-on:click="
@@ -329,7 +339,7 @@
                                 </div>
                             </dd>
                         </div>
-                    </dl>o
+                    </dl>
                     @if($attempt)
                         <h3 class="text-2xl text-center mt-2 font-semibold leading-6 text-gray-900">{{$attempt->opening->name}}</h3>
                     @endif
@@ -342,6 +352,17 @@
                             <div class="text-center w-full">{{ $correctMoveNotation }}</div>
                         @endif
                     @endif
+                    <div class="flex flex-col w-full space-y-4 mt-4">
+                        <div class="flex flex-col justify-center space-y-4">
+                            <x-filament::button x-on:click="showHintOne = !showHintOne">Hint 1</x-filament::button>
+                            <div x-show="showHintOne" class="prose text-center">{!! $correctMove->hint_one !!}</div>
+                        </div>
+                        <div class="flex flex-col justify-center space-y-4">
+                            <x-filament::button x-on:click="showHintTwo = !showHintTwo">Hint 2</x-filament::button>
+                            <div x-show="showHintTwo" class="prose text-center">{!! $correctMove->hint_two !!}</div>
+                        </div>
+                    </div>
+
                 </div>
             @endif
             @if(count($this->openings) == 0)

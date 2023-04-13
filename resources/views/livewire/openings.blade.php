@@ -73,7 +73,7 @@
     <div>
         <form wire:submit.prevent="setOpening"
               class="w-full px-3">
-            {{ $this->form }}
+            {{ $this->openingsForm }}
 
             <x-filament::button type="submit">
                 Set Openings
@@ -395,9 +395,22 @@
                     <div class="text-center w-full">Correct Move</div>
                     @if($correctMove)
                         <div class="text-center w-full">{{ $correctMove->notation }}</div>
+                        <div>
+                            <form wire:submit.prevent="saveHints"
+                                  class="w-full px-3">
+                                {{ $this->hintsForm }}
+
+                                <x-filament::button type="submit">
+                                    Save Hints
+                                </x-filament::button>
+                            </form>
+                        </div>
                     @else
                         <div class="text-center w-full text-red-700">None Recorded</div>
                     @endif
+                </div>
+                <div>
+
                 </div>
                 <div>
                     @if(!$showLichess)

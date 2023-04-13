@@ -6,6 +6,7 @@ use App\Models\CorrectMove;
 use App\Models\LichessPossibleMoves;
 use App\Models\Opening;
 use App\Models\PossibleMove;
+use Filament\Forms\Components\RichEditor;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Concerns\InteractsWithForms;
@@ -34,6 +35,7 @@ class Openings extends Component implements HasForms, HasTable
     public $showLichess = false;
 
     public $formData = [];
+    public $hintsFormData = [];
     public $currentFen = 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1';
 
     public $lichessPossibleMoves;
@@ -50,10 +52,19 @@ class Openings extends Component implements HasForms, HasTable
                 $this->correctMove = null;
             }
         }
-        $this->form->fill();
+        $this->openingsForm->fill();
+        $this->hintsForm->fill();
     }
 
-    public function form(Form $form): Form
+    protected function getForms(): array
+    {
+        return [
+            'openingsForm',
+            'hintsForm',
+        ];
+    }
+
+    public function openingsForm(Form $form): Form
     {
         return $form
             ->schema([
@@ -94,8 +105,32 @@ class Openings extends Component implements HasForms, HasTable
             ->statePath('formData');
     }
 
-    public
-    function updateProbability($id, $probability)
+    public function hintsForm(Form $form): Form
+    {
+        return $form
+            ->schema([
+                RichEditor::make('hint_one')
+                    ->toolbarButtons(['bold', 'italic', 'bulletList'])
+                    ->label('First Hint'),
+                RichEditor::make('hint_two')
+                    ->toolbarButtons(['bold', 'italic', 'bulletList'])
+                    ->label('Second Hint'),
+            ])
+            ->statePath('hintsFormData');
+    }
+
+    public function saveHints()
+    {
+        $data = $this->hintsForm->getState();
+        $this->correctMove->update([
+            'hint_one' => $data['hint_one'],
+            'hint_two' => $data['hint_two'],
+        ]);
+
+        Notification::make()->title('Hints Saved')->success()->send();
+    }
+
+    public function updateProbability($id, $probability)
     {
         $possibleMove = PossibleMove::find($id);
         $possibleMove->probability = $probability;
@@ -128,8 +163,7 @@ class Openings extends Component implements HasForms, HasTable
         Notification::make()->title('Opening Set. Start Training')->success()->send();
     }
 
-    public
-    function createAndSetOpening()
+    public function createAndSetOpening()
     {
         $this->validate([
             'newOpeningName' => 'required',
@@ -163,6 +197,8 @@ class Openings extends Component implements HasForms, HasTable
             ]);
 
             $this->possibleMoves = $correctMove->possibleMoves;
+            $this->correctMove = null;
+            $this->hintsForm->fill();
         }
         // if playing as white and this is a black move, save as possible move
         if ($this->playAsWhite && $color === 'black') {
@@ -184,6 +220,10 @@ class Openings extends Component implements HasForms, HasTable
                 ->get();
 
             $this->correctMove = $possibleMove->correctMove;
+            $this->hintsForm->fill([
+                'hint_one' => $this->correctMove->hint_one,
+                'hint_two' => $this->correctMove->hint_two,
+            ]);
         }
         // if playing as black and this is a black move, save as correct move
         if ($this->playAsWhite == false && $color === 'black') {
@@ -206,6 +246,7 @@ class Openings extends Component implements HasForms, HasTable
                 ->get();
 
             $this->correctMove = null;
+            $this->hintsForm->fill();
         }
         // if playing as black and this is a white move, save as possible move
         if ($this->playAsWhite == false && $color !== 'black') {
@@ -228,6 +269,10 @@ class Openings extends Component implements HasForms, HasTable
                 ->get();
 
             $this->correctMove = $possibleMove->correctMove;
+            $this->hintsForm->fill([
+                'hint_one' => $this->correctMove->hint_one,
+                'hint_two' => $this->correctMove->hint_two,
+            ]);
         }
     }
 
@@ -239,6 +284,18 @@ class Openings extends Component implements HasForms, HasTable
             $this->possiblemoves = $this->opening->possibleMoves()->where('from_fen', $fen)->get();
         } elseif ($turn === 'w' && $this->playAsWhite === true) {
             $this->correctMove = $this->opening->correctMoves()->where('from_fen', $fen)->get()->first();
+            $this->hintsForm->fill([
+                'hint_one' => $this->correctMove->hint_one,
+                'hint_two' => $this->correctMove->hint_two,
+            ]);
+        } elseif ($turn === 'b' && $this->playAsWhite === false) {
+            $this->correctMove = $this->opening->correctMoves()->where('from_fen', $fen)->get()->first();
+            $this->hintsForm->fill([
+                'hint_one' => $this->correctMove->hint_one,
+                'hint_two' => $this->correctMove->hint_two,
+            ]);
+        } elseif ($turn === 'w' && $this->playAsWhite === false) {
+            $this->possibleMoves = $this->opening->possibleMoves()->where('from_fen', $fen)->get();
         }
     }
 
