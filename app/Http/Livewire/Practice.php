@@ -100,8 +100,10 @@ class Practice extends Component implements HasForms
         if($this->playAsWhite == false) {
             $this->setPossibleMoves('rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1');
             $move = $this->randomlyPickAPossibleMoveBasedOnProbability();
-            $this->correctMove = $move->correctMove;
-            $this->dispatchBrowserEvent('next', ['notation' => $move->notation]);
+            if($move) {
+                $this->correctMove = $move->correctMove;
+                $this->dispatchBrowserEvent('next', ['notation' => $move->notation]);
+            }
         }
     }
 
@@ -139,8 +141,19 @@ class Practice extends Component implements HasForms
             } else {
                 // if there are possible moves, then randomly pick one based on probability
                 $move = $this->randomlyPickAPossibleMoveBasedOnProbability();
-                $this->correctMove = $move->correctMove;
-                $this->dispatchBrowserEvent('next', ['notation' => $move->notation]);
+                if($move->correctMove) {
+                    $this->correctMove = $move->correctMove;
+                    $this->dispatchBrowserEvent('next', ['notation' => $move->notation]);
+                } else {
+                    $this->attempt->update([
+                        'correct' => 1,
+                    ]);
+                    $this->trainingSession->update([
+                        'correct' => $this->trainingSession->correct + 1,
+                    ]);
+
+                    $this->startAttempt();
+                }
             }
         } else {
             $this->wrongMove = true;

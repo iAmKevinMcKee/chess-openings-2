@@ -353,6 +353,7 @@
                         @endif
                     @endif
                     <div class="flex flex-col w-full space-y-4 mt-4">
+                        @if($correctMove)
                         <div class="flex flex-col justify-center space-y-4">
                             <x-filament::button x-on:click="showHintOne = !showHintOne">Hint 1</x-filament::button>
                             <div x-show="showHintOne" class="prose text-center">{!! $correctMove->hint_one !!}</div>
@@ -361,6 +362,7 @@
                             <x-filament::button x-on:click="showHintTwo = !showHintTwo">Hint 2</x-filament::button>
                             <div x-show="showHintTwo" class="prose text-center">{!! $correctMove->hint_two !!}</div>
                         </div>
+                        @endif
                     </div>
 
                 </div>
