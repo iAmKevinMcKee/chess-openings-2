@@ -15,6 +15,7 @@
     @livewireStyles
     @filamentStyles
     @vite('resources/css/app.css')
+    @include('chess-styles')
 </head>
 
 <body class="antialiased">
