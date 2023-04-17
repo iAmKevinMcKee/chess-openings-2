@@ -378,10 +378,9 @@
                     @if($possibleMoves)
                         <div>
                             @foreach($possibleMoves->sortByDesc('probability') as $mv)
-                                <div id="possible-move-{{$loop->index}}"
+                                <div id="possible-move-{{$mv->id}}"
                                      x-data="{ probability: {{ $mv['probability'] }} }" class="flex flex-row flex-1">
-                                    <div x-init="console.log(probability)"
-                                         class="w-full text-center">{{ $mv->notation }}</div>
+                                    <div class="w-full text-center">{{ $mv->notation }}</div>
                                     <input type="text" class="w-[100px]" x-model="probability"/>
                                     <button x-on:click="$wire.call('updateProbability', {{$mv->id}}, probability)">
                                         Update
