@@ -104,6 +104,10 @@ class Practice extends Component implements HasForms
                 $this->correctMove = $move->correctMove;
                 $this->dispatchBrowserEvent('next', ['notation' => $move->notation]);
             }
+        } else {
+            $this->correctMove = CorrectMove::where('opening_id', $openingId)
+                ->where('from_fen', 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1')
+                ->get()->first();
         }
     }
 

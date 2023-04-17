@@ -221,8 +221,8 @@ class Openings extends Component implements HasForms, HasTable
 
             $this->correctMove = $possibleMove->correctMove;
             $this->hintsForm->fill([
-                'hint_one' => $this->correctMove->hint_one,
-                'hint_two' => $this->correctMove->hint_two,
+                'hint_one' => $this->correctMove?->hint_one,
+                'hint_two' => $this->correctMove?->hint_two,
             ]);
         }
         // if playing as black and this is a black move, save as correct move
