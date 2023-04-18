@@ -404,6 +404,11 @@
                     <x-filament::button wire:click="startAttempt">Play Again</x-filament::button>
                 @endif
             </div>
+            <div class="w-full px-3 flex flex-col h-full pb-3 justify-end">
+                @if($trainingSession)
+                <x-filament::button wire:click="endSession">End Session</x-filament::button>
+                @endif
+            </div>
         </div>
     </div>
     <x-filament-actions::modals/>

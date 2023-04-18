@@ -56,6 +56,7 @@ class Practice extends Component implements HasForms
                     ->searchable()
                     ->multiple()
                     ->required()
+                    ->reactive()
                     ->options(function ($get) {
                         if(!is_null($get('is_white'))) {
                             return Opening::where('user_id', auth()->user()->id)
@@ -63,7 +64,22 @@ class Practice extends Component implements HasForms
                                 ->pluck('name', 'id');
                         }
                         return [];
-                    })
+                    }),
+                Select::make('moves_count')
+                    ->label('Number of moves')
+                    ->helperText('If you want an opening to be correct after a certain number of moves, change the value here')
+                    ->options([
+                        1 => '1',
+                        2 => '2',
+                        3 => '3',
+                        4 => '4',
+                        5 => '5',
+                        6 => '6',
+                        7 => '7',
+                        8 => '8',
+                        9 => '9',
+                        10 => '10',
+                    ]),
             ])
             ->statePath('formData');
     }
@@ -83,8 +99,16 @@ class Practice extends Component implements HasForms
             'user_id' => auth()->user()->id,
         ]);
 
+        $this->movesCount = $form['moves_count'];
+
         Notification::make()->success()->title('openings are set')->send();
         $this->startAttempt();
+    }
+
+    public function endSession()
+    {
+        $this->trainingSession = null;
+        $this->openings = [];
     }
 
     public function startAttempt()
@@ -133,6 +157,18 @@ class Practice extends Component implements HasForms
                 'correct' => 1,
             ]);
             $this->wrongMove = false;
+            // if you've hit the moves count limit, then the round is over and the user has won
+            if($this->movesCount && $this->attempt->attempt_moves()->count() >= $this->movesCount) {
+                $this->attempt->update([
+                    'correct' => 1,
+                ]);
+                $this->trainingSession->update([
+                    'correct' => $this->trainingSession->correct + 1,
+                ]);
+
+                $this->startAttempt();
+                return;
+            }
             $this->setPossibleMoves($toFen);
             if ($this->possibleMoves->count() === 0) {
                 // if no possible moves, then the round is over and the user has won
