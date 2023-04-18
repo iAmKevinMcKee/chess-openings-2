@@ -26,8 +26,10 @@ class Practice extends Component implements HasForms
     public $wrongMove = null;
     public $openings = [];
     public $correctMove = null;
-    public $hintOne;
-    public $hintTwo;
+    public $hintOne = null;
+    public $hintTwo = null;
+
+    public $movesCount = null;
 
 
     public function mount(): void
