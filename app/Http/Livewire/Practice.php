@@ -26,6 +26,9 @@ class Practice extends Component implements HasForms
     public $wrongMove = null;
     public $openings = [];
     public $correctMove = null;
+    public $computerMoves = [];
+    public $retryComputerMoves = [];
+    public $tryAgain = false;
     public $hintOne = null;
     public $hintTwo = null;
 
@@ -58,7 +61,7 @@ class Practice extends Component implements HasForms
                     ->required()
                     ->reactive()
                     ->options(function ($get) {
-                        if(!is_null($get('is_white'))) {
+                        if (!is_null($get('is_white'))) {
                             return Opening::where('user_id', auth()->user()->id)
                                 ->where('is_white', $get('is_white'))
                                 ->pluck('name', 'id');
@@ -87,7 +90,7 @@ class Practice extends Component implements HasForms
     public function setOpenings()
     {
         $form = $this->form->getState();
-        if($form['is_white'] == 1) {
+        if ($form['is_white'] == 1) {
             $this->playAsWhite = true;
         } else {
             $this->playAsWhite = false;
@@ -111,8 +114,28 @@ class Practice extends Component implements HasForms
         $this->openings = [];
     }
 
-    public function startAttempt()
+    public function newAttempt()
     {
+        $this->tryAgain = false;
+        $this->startAttempt();
+    }
+
+    public function retry()
+    {
+        $this->tryAgain = true;
+        $this->startAttempt(true);
+    }
+
+    public function startAttempt($retry = false)
+    {
+        if(! $retry) {
+            $this->tryAgain = false;
+        } else {
+            $this->retryComputerMoves = $this->computerMoves;
+        }
+
+        $this->computerMoves = [];
+
         $this->dispatchBrowserEvent('reset');
         $this->wrongMove = false;
         $this->correctMoveNotation = null;
@@ -123,10 +146,11 @@ class Practice extends Component implements HasForms
             'training_session_id' => $this->trainingSession->id,
         ]);
 
-        if($this->playAsWhite == false) {
+        if ($this->playAsWhite == false) {
             $this->setPossibleMoves('rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1');
             $move = $this->randomlyPickAPossibleMoveBasedOnProbability();
-            if($move) {
+            if ($move) {
+                $this->computerMoves[] = $move->id;
                 $this->correctMove = $move->correctMove;
                 $this->dispatchBrowserEvent('next', ['notation' => $move->notation]);
             }
@@ -158,7 +182,7 @@ class Practice extends Component implements HasForms
             ]);
             $this->wrongMove = false;
             // if you've hit the moves count limit, then the round is over and the user has won
-            if($this->movesCount && $this->attempt->attempt_moves()->count() >= $this->movesCount) {
+            if ($this->movesCount && $this->attempt->attempt_moves()->count() >= $this->movesCount) {
                 $this->attempt->update([
                     'correct' => 1,
                 ]);
@@ -183,7 +207,8 @@ class Practice extends Component implements HasForms
             } else {
                 // if there are possible moves, then randomly pick one based on probability
                 $move = $this->randomlyPickAPossibleMoveBasedOnProbability();
-                if($move->correctMove) {
+                if ($move->correctMove) {
+                    $this->computerMoves[] = $move->id;
                     $this->correctMove = $move->correctMove;
                     $this->dispatchBrowserEvent('next', ['notation' => $move->notation]);
                 } else {
@@ -224,6 +249,16 @@ class Practice extends Component implements HasForms
 
     private function randomlyPickAPossibleMoveBasedOnProbability(): PossibleMove|null
     {
+        ray($this->retryComputerMoves);
+        if(count($this->retryComputerMoves) > 0 && $this->tryAgain) {
+            // get the id of the first move from the computer moves array
+            $id = $this->retryComputerMoves[0];
+            // remove the first element from the array
+            array_shift($this->retryComputerMoves);
+            // return the moves
+            $possibleMove = PossibleMove::find($id);
+            return $possibleMove;
+        }
         $totalProbability = $this->possibleMoves->sum('probability');
         $randomNumber = rand(0, $totalProbability);
         foreach ($this->possibleMoves as $move) {

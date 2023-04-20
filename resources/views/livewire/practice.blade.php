@@ -666,7 +666,8 @@
 
             <div>
                 @if($wrongMove)
-                    <x-filament::button wire:click="startAttempt">Play Again</x-filament::button>
+                    <x-filament::button wire:click="retry">Try This Opening Again</x-filament::button>
+                    <x-filament::button wire:click="newAttempt">Try a Different Sequence</x-filament::button>
                 @endif
             </div>
             <div class="w-full px-3 flex flex-col h-full pb-3 justify-end">
