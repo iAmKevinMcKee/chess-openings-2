@@ -21,6 +21,6 @@ class CorrectMove extends Model
 
     public function possibleMoves()
     {
-        return $this->hasMany(PossibleMove::class, 'from_fen', 'to_fen');
+        return $this->hasMany(PossibleMove::class, 'from_fen', 'to_fen')->where('opening_id', $this->opening_id);
     }
 }
