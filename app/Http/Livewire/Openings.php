@@ -15,6 +15,7 @@ use Filament\Forms\Form;
 use Filament\Notifications\Notification;
 use Filament\Tables\Columns\Column;
 use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Columns\TextInputColumn;
 use Filament\Tables\Concerns\InteractsWithTable;
 use Filament\Tables\Contracts\HasTable;
 use Filament\Tables\Table;
@@ -182,6 +183,7 @@ class Openings extends Component implements HasForms, HasTable
     {
         $this->showLichess = false;
         $this->currentFen = $toFen;
+        $this->emitTo(PossibleMovesTable::class, 'setFen', $toFen);
         // if playing as white and this is a white move, save as correct move
         if ($this->playAsWhite && $color === 'white') {
             $correctMove = CorrectMove::updateOrCreate([
@@ -304,23 +306,19 @@ class Openings extends Component implements HasForms, HasTable
         $this->showLichess = true;
     }
 
-//    @var Table
     public function table(Table $table): Table
     {
-        return $table
-            ->query(function() {
-                $currentFen = $this->currentFen;
-                if($this->showLichess == false) {
-
-                    $currentFen = '';
-                }
-                return LichessPossibleMoves::setFen($currentFen)->query();
-            })
+        if($this->opening) {
+            $query = $this->opening->possibleMoves()->where('from_fen', $this->currentFen)->getQuery();
+        } else {
+            $query = PossibleMove::query();
+        }
+        return $table->query(function() use ($query) { return $query; })
+            ->defaultSort('probability', 'desc')
             ->columns([
-                TextColumn::make('notation'),
-                TextColumn::make('percent')->sortable(),
-                TextColumn::make('white_wins')
-            ])->defaultSort('percent', 'desc');
+                TextColumn::make('notation')->label('Move'),
+                TextInputColumn::make('probability')->sortable(),
+            ]);
     }
 
     public function render()

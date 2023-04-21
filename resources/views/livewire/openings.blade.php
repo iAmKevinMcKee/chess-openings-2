@@ -375,19 +375,23 @@
                     x-show="!trainingCorrectMove()"
                     class="flex flex-col">
                     <div class="text-center w-full">Possible Moves</div>
-                    @if($possibleMoves)
+                    @if($opening && $currentFen && $possibleMoves)
                         <div>
-                            @foreach($possibleMoves->sortByDesc('probability') as $mv)
-                                <div id="possible-move-{{$mv->id}}"
-                                     x-data="{ probability: {{ $mv['probability'] }} }" class="flex flex-row flex-1">
-                                    <div class="w-full text-center">{{ $mv->notation }}</div>
-                                    <input type="text" class="w-[100px]" x-model="probability"/>
-                                    <button x-on:click="$wire.call('updateProbability', {{$mv->id}}, probability)">
-                                        Update
-                                    </button>
-                                </div>
-                            @endforeach
-                        </div>
+                            <livewire:possible-moves-table :opening-id="$opening->id" :current-fen="$currentFen"/>
+                        </div>p
+
+{{--                        <div>--}}
+{{--                            @foreach($possibleMoves->sortByDesc('probability') as $mv)--}}
+{{--                                <div id="possible-move-{{$mv->id}}"--}}
+{{--                                     x-data="{ probability: {{ $mv['probability'] }} }" class="flex flex-row flex-1">--}}
+{{--                                    <div class="w-full text-center">{{ $mv->notation }}</div>--}}
+{{--                                    <input type="text" class="w-[100px]" x-model="probability"/>--}}
+{{--                                    <button x-on:click="$wire.call('updateProbability', {{$mv->id}}, probability)">--}}
+{{--                                        Update--}}
+{{--                                    </button>--}}
+{{--                                </div>--}}
+{{--                            @endforeach--}}
+{{--                        </div>--}}
                     @endif
                 </div>
                 <div x-show="trainingCorrectMove()">
@@ -417,9 +421,8 @@
                             Show Lichess
                         </x-filament::button>
                     @else
-                        <div>
-                            {{$this->table}}
-                        </div>
+                        <livewire:lichess-possible-moves-table :current-fen="$currentFen"/>
+
                     @endif
                 </div>
 

@@ -7,7 +7,7 @@
     "require": {
         "php": "^8.2",
         "calebporzio/sushi": "^2.4",
-        "filament/filament": "v3.0.0-alpha67",
+        "filament/filament": "v3.0.0-alpha75",
         "guzzlehttp/guzzle": "^7.2",
         "laravel/framework": "^9.19",
         "laravel/jetstream": "^2.13",
